@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RiskAlert",
+  "description": "Multi-modal fused drilling hazard alert event with recommendations",
+  "type": "object",
+  "properties": {
+    "alert_id": { "type": "string", "format": "uuid" },
+    "well_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "measured_depth": { "type": "number", "minimum": 0 },
+    "alert_type": { "type": "string" },
+    "severity": { "type": "string", "enum": ["INFO", "WATCH", "WARNING", "CRITICAL"] },
+    "lead_time_seconds": { "type": "integer", "minimum": 0 },
+    "confidence_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "ml_probability": { "type": "number", "minimum": 0, "maximum": 1 },
+    "physics_severity": { "type": "number", "minimum": 0, "maximum": 1 },
+    "primary_mechanism": { "type": "string" },
+    "driller_action_summary": { "type": "string" },
+    "detailed_sop": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "historical_citations": {
+      "type": "array",
+      "items": { "type": "object" }
+    }
+  },
+  "required": ["alert_id", "well_id", "timestamp", "measured_depth", "alert_type", "severity", "driller_action_summary"]
+}

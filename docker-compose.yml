@@ -1,0 +1,140 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # 1. TimescaleDB + PostGIS (Relational, Geospatial & Telemetry Hypertables)
+  # ---------------------------------------------------------------------------
+  timescaledb:
+    image: timescale/timescaledb-ha:pg16-latest
+    container_name: stratasentry-timescaledb
+    environment:
+      POSTGRES_USER: stratasentry
+      POSTGRES_PASSWORD: nwis_secure_password_2026
+      POSTGRES_DB: stratasentry_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stratasentry -d stratasentry_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - stratasentry-net
+
+  # ---------------------------------------------------------------------------
+  # 2. Qdrant Vector Database (Depth-Aware Semantic Retrieval)
+  # ---------------------------------------------------------------------------
+  qdrant:
+    image: qdrant/qdrant:v1.9.0
+    container_name: stratasentry-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - stratasentry-net
+
+  # ---------------------------------------------------------------------------
+  # 3. Apache Kafka & Zookeeper (High-Frequency Sensor Event Bus)
+  # ---------------------------------------------------------------------------
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: stratasentry-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - stratasentry-net
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: stratasentry-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - stratasentry-net
+
+  # ---------------------------------------------------------------------------
+  # 4. StrataSentry FastAPI Gateway & Analytics Engine
+  # ---------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.api
+    container_name: stratasentry-api
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      kafka:
+        condition: service_started
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://stratasentry:nwis_secure_password_2026@timescaledb:5432/stratasentry_db
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: 6333
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      LLM_PROVIDER: offline_mock
+    volumes:
+      - .:/app
+    networks:
+      - stratasentry-net
+
+  # ---------------------------------------------------------------------------
+  # 5. Next.js Tactical Drilling Operations HUD
+  # ---------------------------------------------------------------------------
+  dashboard:
+    build:
+      context: ./apps/dashboard
+      dockerfile: Dockerfile
+    container_name: stratasentry-dashboard
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_WS_URL: ws://localhost:8000/ws/telemetry
+    networks:
+      - stratasentry-net
+
+  # ---------------------------------------------------------------------------
+  # 6. Real-Time Telemetry Rig Simulator (Optional streaming container)
+  # ---------------------------------------------------------------------------
+  simulator:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.services
+    container_name: stratasentry-simulator
+    depends_on:
+      - api
+      - kafka
+    command: python scripts/simulate_telemetry.py --well NHK-421 --rate-hz 2 --inject-incident packoff
+    environment:
+      API_URL: http://api:8000
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    networks:
+      - stratasentry-net
+
+networks:
+  stratasentry-net:
+    driver: bridge
+
+volumes:
+  timescaledb_data:
+  qdrant_data:

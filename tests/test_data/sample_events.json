@@ -1,0 +1,19 @@
+[
+  {
+    "well_name": "NHK-421",
+    "depth_md": 2845.2,
+    "hazard_type": "HOLE_PACKOFF",
+    "severity": "WARNING",
+    "spp_psi": 3450.0,
+    "torque_knm": 21.4,
+    "flow_in_lpm": 2400.0,
+    "flow_out_pct": 68.0
+  },
+  {
+    "well_name": "MOR-118",
+    "depth_md": 2848.0,
+    "hazard_type": "STUCK_PIPE_PACKOFF",
+    "severity": "CRITICAL",
+    "action": "Spotted 45 bbl polymer pill, jarred up 85 klbs"
+  }
+]

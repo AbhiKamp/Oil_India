@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DrillingTelemetryFrame",
+  "description": "Standardized high-frequency real-time MWD/LWD/Surface sensor frame",
+  "type": "object",
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "well_id": { "type": "string" },
+    "measured_depth": { "type": "number", "minimum": 0 },
+    "bit_depth": { "type": "number", "minimum": 0 },
+    "rop": { "type": "number", "description": "Rate of Penetration in m/hr" },
+    "wob": { "type": "number", "description": "Weight on Bit in metric tons" },
+    "surface_torque": { "type": "number", "description": "Surface Torque in kN.m" },
+    "rotary_rpm": { "type": "number", "description": "Rotary Table / Top Drive RPM" },
+    "standpipe_pressure": { "type": "number", "description": "Standpipe Pressure in psi" },
+    "flow_in": { "type": "number", "description": "Mud Pump Flow In in L/min" },
+    "flow_out_pct": { "type": "number", "description": "Flow Out Percentage" },
+    "pit_volume": { "type": "number", "description": "Active Pit Volume in m^3" },
+    "mud_weight_in": { "type": "number", "description": "Mud Density In in SG" },
+    "ecd": { "type": "number", "description": "Equivalent Circulating Density in SG" },
+    "gamma_ray": { "type": "number", "description": "MWD Gamma Ray in API units" },
+    "gas_total": { "type": "number", "description": "Total Gas in units" }
+  },
+  "required": ["timestamp", "well_id", "measured_depth", "standpipe_pressure", "flow_in"]
+}

@@ -1,0 +1,18 @@
+log_level: INFO
+
+service:
+  max_request_size_mb: 32
+  max_workers: 4
+  host: 0.0.0.0
+  http_port: 6333
+  grpc_port: 6334
+
+storage:
+  storage_path: ./storage
+  snapshots_path: ./snapshots
+  on_disk_payload: true
+  optimizers:
+    deleted_threshold: 0.2
+    vacuum_min_vector_number: 1000
+    default_segment_number: 2
+    max_segment_size_kb: 500000

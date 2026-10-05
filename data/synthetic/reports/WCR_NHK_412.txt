@@ -1,0 +1,44 @@
+================================================================================
+OIL INDIA LIMITED - DRILLING & WORKOVER DEPARTMENT
+WELL COMPLETION REPORT (WCR) - WELL: NHK-412
+FIELD: NAHARKATIYA, UPPER ASSAM BASIN | RIG: OIL-RIG-02
+================================================================================
+
+1. GENERAL WELL INFORMATION
+Well Name: NHK-412 (Naharkatiya Well #412)
+Surface Location: 27.2890 N, 95.3452 E (UTM 46N)
+Kelly Bushing Elevation: 114.2 m MSL
+Spud Date: 10-MAR-2024 | Completion Date: 12-MAY-2024
+Total Depth Reached: 3,820.0 m MD (3,650.0 m TVD)
+
+2. STRATIGRAPHIC TOPS
+- Dihing Formation: Surface to 650 m MD
+- Tipam Sandstone: 650 m to 1,840 m MD (Lost circulation zone encountered at 1,420 m)
+- Girujan Clay: 1,840 m to 2,540 m MD (Severe clay swelling requiring KCl mud)
+- Barail Coal-Shale: 2,540 m to 3,390 m MD (High pressure gas kicks encountered)
+- Kopili Formation: 3,390 m to 3,820 m MD (Tectonic overpressure shales)
+
+3. DRILLING INCIDENT LOG (SECTION 5.1 - GAS KICK EVENT)
+[PAGE 24]
+Depth: 2,912.0 m MD | Stratigraphy: Barail Coal-Shale Formation
+Incident Type: GAS KICK & INFLUX IN BARIAL SAND-COAL TRANSITION
+Description of Event:
+While drilling ahead at 2,912.0 m MD with mud weight 1.26 SG, the active pit volume
+began increasing rapidly. Recorded an 18-barrel pit gain within 6 minutes.
+Flow out paddle indicated 88% flow with pumps constant at 2,200 LPM.
+The driller performed a flow check: well continued flowing with pumps off (1.5 bbl/min).
+
+Immediate Well Control Actions Taken:
+1. Space out drillstring, shut in well on Annular Blowout Preventer (BOP).
+2. Monitored pressures: Initial Shut-In Drillpipe Pressure (SIDPP) = 320 psi;
+   Initial Shut-In Casing Pressure (SICP) = 410 psi.
+3. Calculated required kill mud weight:
+   MW_kill = 1.26 SG + (320 / (0.052 * 2780 * 3.2808)) = 1.34 SG.
+4. Weighted up mud system in suction pits to 1.34 SG using barite.
+5. Successfully killed well using the Wait and Weight method. Zero gas reached surface.
+Total NPT: 18.0 hours.
+
+Recommendations:
+- Barail formation in Greater Naharkatiya exhibits abnormal pore pressure ramps between
+  2,880 m and 2,950 m MD. Pre-weight mud to 1.32 SG prior to penetrating 2,850 m.
+================================================================================

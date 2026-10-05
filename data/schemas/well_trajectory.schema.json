@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WellTrajectoryStation",
+  "description": "Directional survey station calculated via Minimum Curvature Method",
+  "type": "object",
+  "properties": {
+    "wellbore_id": { "type": "string" },
+    "station_index": { "type": "integer", "minimum": 0 },
+    "measured_depth": { "type": "number", "minimum": 0 },
+    "inclination_deg": { "type": "number", "minimum": 0, "maximum": 180 },
+    "azimuth_deg": { "type": "number", "minimum": 0, "maximum": 360 },
+    "true_vertical_depth": { "type": "number", "minimum": 0 },
+    "northing_delta": { "type": "number" },
+    "easting_delta": { "type": "number" },
+    "dogleg_severity": { "type": "number", "minimum": 0, "description": "deg/30m" },
+    "vertical_section": { "type": "number" }
+  },
+  "required": ["measured_depth", "inclination_deg", "azimuth_deg", "true_vertical_depth", "northing_delta", "easting_delta"]
+}

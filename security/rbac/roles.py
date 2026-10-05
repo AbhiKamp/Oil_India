@@ -1,0 +1,13 @@
+"""
+StrataSentry-NWIS: Enterprise Role Definitions
+"""
+
+from enum import Enum
+
+class UserRole(str, Enum):
+    DRILLER = "DRILLER"
+    TOOLPUSHER = "TOOLPUSHER"
+    OPERATIONS_GEOLOGIST = "OPERATIONS_GEOLOGIST"
+    DRILLING_ENGINEER = "DRILLING_ENGINEER"
+    DATA_SCIENTIST = "DATA_SCIENTIST"
+    SECURITY_ADMIN = "SECURITY_ADMIN"

@@ -1,0 +1,16 @@
+[Unit]
+Description=StrataSentry-NWIS Rig-Site Edge Service Daemon
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=stratasentry
+WorkingDirectory=/opt/stratasentry-nwis
+ExecStart=/opt/stratasentry-nwis/venv/bin/python /opt/stratasentry-nwis/infrastructure/edge-node/rig_edge_daemon.py
+Restart=always
+RestartSec=5s
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,60 @@
+================================================================================
+OIL INDIA LIMITED - DRILLING & WORKOVER DEPARTMENT
+WELL COMPLETION REPORT (WCR) - WELL: MOR-118
+FIELD: MORAN, UPPER ASSAM BASIN | RIG: OIL-RIG-07
+================================================================================
+
+1. GENERAL WELL INFORMATION
+Well Name: MOR-118 (Moran Well #118)
+Surface Location: 27.1820 N, 94.9215 E (UTM 46N)
+Kelly Bushing Elevation: 108.5 m MSL | Ground Level: 101.2 m MSL
+Spud Date: 15-AUG-2023 | Total Depth Reached: 28-OCT-2023
+Final Total Depth: 4,100.0 m MD (3,890.2 m TVD)
+
+2. STRATIGRAPHIC SUCCESSION & TOPS PENETRATED
+- Dihing Formation: Surface to 610 m MD (Loose sandstones, gravels, cobbles)
+- Tipam Sandstone: 610 m to 1,820 m MD (Massive porous water sands, depletion zones)
+- Girujan Clay: 1,820 m to 2,520 m MD (Mottled plastic shales, high swelling tendency)
+- Barail Coal-Shale: 2,520 m to 3,380 m MD (Carbonaceous shales, multiple coal seams)
+- Kopili Formation: 3,380 m to 3,920 m MD (Splintery calcareous shales, overpressured)
+- Sylhet Limestone: 3,920 m to 4,100 m MD (Dense fractured nummulitic limestone)
+
+3. CASING & MUD PROGRAM SUMMARY
+- 20" Conductor Casing set at 95.0 m MD (Cemented to surface)
+- 13-3/8" Surface Casing set at 850.0 m MD in Tipam sand (Mud Weight: 1.12 SG bentonite)
+- 9-5/8" Intermediate Casing set at 2,520.0 m MD in Girujan base (Mud Weight: 1.22 SG KCL-PHPA)
+- 8-1/2" Open Hole drilled from 2,520 m to 3,380 m MD (Mud Weight: 1.28 - 1.34 SG Glycol/KCL)
+
+4. DRILLING PROBLEMS & INCIDENT LOG (SECTION 4.2 - CRITICAL HISTORICAL PRECEDENT)
+[PAGE 19]
+Depth: 2,848.0 m MD (2,724.0 m TVD) | Stratigraphy: Barail Coal-Shale Formation
+Incident Type: MECHANICAL HOLE PACK-OFF & STUCK PIPE
+Description of Event:
+While drilling ahead at 2,848.0 m MD with an 8-1/2" PDC bit, drilling parameters were:
+ROP = 14 m/hr, WOB = 12 tons, RPM = 110, Torque = 14 kNm, SPP = 2,820 psi, Flow = 2,350 LPM.
+The driller stopped rotary and picked off bottom 2 meters to perform a drillpipe connection.
+Immediately upon picking up, string motion became tight. Standpipe pressure surged to 3,650 psi
+at 800 LPM, indicating severe annular obstruction. Total loss of rotation occurred.
+
+Root Cause Analysis:
+Severe sloughing and spalling of splintery carbonaceous shale and cleated coal beds between
+2,835 m and 2,852 m MD. The annular velocity (120 ft/min) was insufficient to lift large coal
+cuttings under laminar flow conditions during the connection pause. The coal pack accumulated
+around the top stabilizer and drill collar upset.
+
+Mitigation Procedure & Fishing Actions Taken:
+1. Pumping was immediately restricted to prevent fracturing the formation at the casing shoe.
+2. Spotted a 45-barrel high-density/high-viscosity sweep pill (weighted to 1.40 SG with barite
+   and boosted with PAC-R polymer) across the stuck interval.
+3. Allowed 45 minutes soaking time.
+4. Engaged double-acting hydraulic fishing jars. Applied 85 klbs upward jarring overpull.
+5. Established slow rotation at 35 RPM while working torque through string.
+6. The string was successfully freed after 14.5 hours of continuous jarring and circulating.
+7. Subsequent caliper log showed a 14.2-inch washout zone at 2,846 - 2,852 m MD.
+
+Recommendations for Future Offset Wells:
+- Never pause circulation for connections in Barail Coal without circulating at least 1.5 annular
+  volumes at 2,400+ LPM.
+- Maintain mud density at a minimum of 1.30 SG with 4% glycol to inhibit shale cleat hydration.
+- In the event of initial SPP surge, pick up string immediately before the pack consolidates.
+================================================================================

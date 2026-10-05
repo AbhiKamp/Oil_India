@@ -1,0 +1,24 @@
+================================================================================
+OIL INDIA LIMITED - DRILLING & WORKOVER DEPARTMENT
+WELL COMPLETION REPORT (WCR) - WELL: BGH-07
+FIELD: BAGHJAN, UPPER ASSAM BASIN | RIG: OIL-RIG-11
+================================================================================
+
+1. GENERAL WELL INFORMATION
+Well Name: BGH-07 (Baghjan Well #07)
+Surface Location: 27.5921 N, 95.3854 E
+Kelly Bushing Elevation: 122.0 m MSL
+Total Depth: 3,920.0 m MD
+
+2. INCIDENT HIGHLIGHT: LOST CIRCULATION IN TIPAM SANDSTONE
+[PAGE 14]
+Depth: 1,642.0 m MD | Formation: Tipam Massive Sandstone
+Incident Type: PARTIAL TO SEVERE LOST CIRCULATION
+Description:
+Encountered sub-normally pressured depleted reservoir sand. Sudden drop in active pit
+volume of 65 barrels over 25 minutes. Standpipe pressure decreased by 140 psi.
+Mitigation:
+Pumped a 30 bbl medium-coarse Calcium Carbonate (CaCO3) + Mica LCM pill.
+Reduced flow rate from 2,800 LPM to 2,000 LPM. Losses healed after 2 hours.
+Mud weight reduced from 1.24 SG to 1.18 SG to reduce overbalance.
+================================================================================
