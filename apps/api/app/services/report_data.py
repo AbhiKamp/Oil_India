@@ -3,9 +3,22 @@
 import re
 import json
 from pathlib import Path
+from .. import service_packages  # Portable aliases for direct source-parser callers.
+from services.document_intelligence.extractors.mitigation_extractor import MitigationExtractor
 
 REPORTS = Path(__file__).resolve().parents[4] / "data" / "synthetic" / "reports"
 PROGNOSIS = REPORTS.parent / "formation_prognosis_nhk421.json"
+
+
+def recorded_response(excerpt: str):
+    """Return verbatim source text only; historical response is not current advice."""
+    actions = MitigationExtractor().extract_mitigation_actions(excerpt)
+    outcome_lines = [line.strip() for line in excerpt.splitlines() if re.search(
+        r"\b(?:successfully freed|successfully killed|losses healed|outcome:)\b", line, re.I)]
+    return {
+        "mitigation": "\n".join(action["raw_text"] for action in actions) or None,
+        "outcome": "\n".join(outcome_lines) or None,
+    }
 
 
 def reports():
@@ -83,5 +96,6 @@ def events(well_id: str | None = None):
                 "source_file": path.name,
                 "page_marker": int(marker.group(1)) if marker else None,
                 "page_reference_type": "synthetic_text_report_marker_not_verified_pdf_page",
+                **recorded_response(excerpt),
             })
     return found

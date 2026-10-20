@@ -41,6 +41,8 @@ export default function DashboardPage() {
   const [answer, setAnswer] = useState<AssistantResponse | null>(null);
   const [asking, setAsking] = useState(false);
   const requestWell = useRef('');
+  const contextGeneration = useRef(0);
+  const questionGeneration = useRef(0);
   const [scenario, setScenario] = useState<Scenario>('normal');
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -112,6 +114,9 @@ export default function DashboardPage() {
   }, [source]);
 
   useEffect(() => {
+    contextGeneration.current++;
+    questionGeneration.current++;
+    setAsking(false);
     setStep(0); setPlaying(false); setNote(''); setAnswer(null);
     setNearby([]); setWatches([]); setFormations([]); setCompareFormations([]);
     setTrajectory([]); setTelemetry(null); setRisk(null);
@@ -136,7 +141,7 @@ export default function DashboardPage() {
         const result = await replayDemo(scenario, step, wellId);
         if (generation !== replayGeneration.current) return;
         setReplayStatus(`Synthetic replay · ${result.scenario} · step ${result.step}/${result.max_steps}${result.telemetry ? ` · ${result.telemetry.measured_depth.toFixed(1)} m MD` : ''}${result.risk ? ` · ${result.risk.severity} assessment` : ''}`);
-        if (result.telemetry) setTelemetry(result.telemetry);
+        setTelemetry(result.telemetry || null);
         setRisk(result.risk || null);
         if (result.step >= 80) setPlaying(false);
       } catch (e) {
@@ -190,24 +195,27 @@ export default function DashboardPage() {
 
   async function decide() {
     if (!decisionEventId || !note.trim()) return;
+    const generation = contextGeneration.current;
     setBusy(true);
     try {
       const saved = await saveDecision({ well_id: wellId, event_id: decisionEventId, note: note.trim(), actor: 'Engineer (self-entered)', status: 'acknowledged' });
+      if (generation !== contextGeneration.current) return;
       setDecisions((all) => [saved, ...all]); setNote(''); setError('');
-    } catch (e) { setError(e instanceof Error ? e.message : 'Decision could not be saved'); }
+    } catch (e) { if (generation === contextGeneration.current) setError(e instanceof Error ? e.message : 'Decision could not be saved'); }
     finally { setBusy(false); }
   }
 
   async function ask() {
     if (!wellId || !question.trim()) return;
     const targetWell = wellId;
+    const generation = ++questionGeneration.current;
     requestWell.current = targetWell; setAsking(true); setAnswer(null);
     try {
       const result = await queryAssistant(question, targetWell, currentDepth ?? 0, assistantFormation);
-      if (requestWell.current === targetWell) setAnswer(result);
+      if (generation === questionGeneration.current && requestWell.current === targetWell) setAnswer(result);
     } catch (e) {
-      if (requestWell.current === targetWell) setError(e instanceof Error ? e.message : 'Evidence search failed');
-    } finally { if (requestWell.current === targetWell) setAsking(false); }
+      if (generation === questionGeneration.current && requestWell.current === targetWell) setError(e instanceof Error ? e.message : 'Evidence search failed');
+    } finally { if (generation === questionGeneration.current && requestWell.current === targetWell) setAsking(false); }
   }
 
   const ahead = watches.filter((watch) => watch.distance_ahead_md_m != null && watch.distance_ahead_md_m >= 0);
@@ -255,7 +263,7 @@ export default function DashboardPage() {
         </article>
 
         <article className="panel telemetry-panel"><div className="panel-heading"><div><p className="eyebrow">API TELEMETRY SNAPSHOT</p><h2>Measurements &amp; risk</h2></div><span>{telemetry?new Date(telemetry.timestamp).toLocaleTimeString():'NO FRAME RETURNED'}</span></div>
-          {telemetry ? <div className="telemetry-values">{[['Bit depth',telemetry.bit_depth,'m MD'],['ROP',telemetry.rop,'m/h'],['Standpipe pressure',telemetry.standpipe_pressure,'psi'],['Surface torque',telemetry.surface_torque,''],['Flow out',telemetry.flow_out_pct,'%'],['Gas total',telemetry.gas_total,'']].map(([label,value,unit])=><div key={String(label)}><span>{label}</span><strong>{typeof value==='number'?value.toLocaleString(undefined,{maximumFractionDigits:1}):'—'} {unit}</strong></div>)}</div> : <p className="list-empty">Telemetry unavailable. No placeholder readings shown.</p>}
+          {telemetry ? <div className="telemetry-values">{[['Bit depth',telemetry.bit_depth,'m MD'],['ROP',telemetry.rop,'m/h'],['Standpipe pressure',telemetry.standpipe_pressure,'psi'],['Surface torque',telemetry.surface_torque,'kN·m'],['Flow out',telemetry.flow_out_pct,'%'],['Gas total',telemetry.gas_total,'gas units']].map(([label,value,unit])=><div key={String(label)}><span>{label}</span><strong>{typeof value==='number'?value.toLocaleString(undefined,{maximumFractionDigits:1}):'—'} {unit}</strong></div>)}</div> : <p className="list-empty">Telemetry unavailable. No placeholder readings shown.</p>}
           {risk ? <div className="risk-card"><p className="eyebrow amber">API RISK ASSESSMENT · {risk.severity}</p><h3>{risk.alert_type}</h3><p>{risk.primary_mechanism}</p><small>{risk.measured_depth.toFixed(1)} m MD · {risk.driller_action_summary}</small><p>Assessment for engineering review; not an instruction or probability claim.</p></div> : <p className="quiet-state">No current risk assessment returned.</p>}
         </article>
       </section>

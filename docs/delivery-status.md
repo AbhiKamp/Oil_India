@@ -20,11 +20,13 @@ Updated 20 October 2026. This records implementation, not the broader scope prom
 
 Checks run with Python 3.14.7, Node 26.8.1, npm 11.19.0 on Linux. Python dependencies are installed in `/tmp/opencode/oil-api-venv` for this session, not system-wide.
 
-- Domain/API/integration suite: `python -m pytest services/ tests/ apps/api/tests/ -q` — **69 passed**, with three existing Pydantic/datetime deprecation warnings (run in that environment).
+- Domain/API/integration suite: `python -m pytest services/ tests/ apps/api/tests/ -q` — **71 passed**, with three existing Pydantic/datetime deprecation warnings (run in that environment). Tests use isolated temporary knowledge stores rather than operator data.
 - Dashboard: `npm run build` in `apps/dashboard`.
+- Browser: `NWIS_TEST_API_URL=http://127.0.0.1:18001 node tests/browser/local-only.mjs` passed against a separate local API. Radius filtering and source viewing made no non-loopback browser requests and produced no page errors. This is not a full air-gap or backend-egress certification.
 - Video: `npx tsc --noEmit` and Remotion renders using `/usr/bin/chromium` in `apps/video`.
 - JavaScript dependency audits were checked after moving the dashboard to Next.js 15 and aligning Remotion packages on 4.0.537.
 - OCR image-only fixture: recognized `Incident Type: GAS KICK`, `Depth: 321 m MD`, and `Formation: Barail` with Tesseract 5.5.3 / Poppler 26.08.0. This is one synthetic smoke test, not a general OCR accuracy claim.
+- Local compute smoke benchmark: 500 repeated synthetic frames took 0.975 seconds, averaging 1.95 ms with 2.91 ms p95 on this environment. This excludes HTTP, sensors, queues, and the UI and is not a throughput/capacity or field-latency claim.
 
 Final command results and film artifacts are reported with the delivery; later changes require rerunning the checks.
 

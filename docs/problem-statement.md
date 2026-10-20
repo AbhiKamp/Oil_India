@@ -35,7 +35,7 @@ When drilling a new well (e.g., *NHK-421*), drillers and toolpushers rarely have
 Standard rig instrumentation uses static sensor thresholds (e.g., `If SPP > 3500 psi, sound alarm`). In reality:
 - Standpipe pressure naturally fluctuates during pump rate adjustments, pipe rotation changes, and bit nozzle variations.
 - Static alarms result in chronic **alarm fatigue**, causing drillers to mute or disregard warnings.
-- Crucially, multi-variable hazard precursors (e.g., torque variance increasing while ROP drops and flow-out slightly lags flow-in) occur **15–45 minutes prior** to catastrophic pack-off, but no single variable crosses a blunt static threshold until the pipe is already irreversibly stuck.
+- Multiple drilling signals may need to be interpreted together—for example, pressure and torque changes alongside falling penetration rate. This repository has not established field warning lead time or a guaranteed relationship between these signals and a future incident.
 
 ### 3.3 Failure 3: Disconnected AI and Lack of Physics Grounding
 Modern generic AI tools fail in drilling because:
@@ -50,5 +50,5 @@ Modern generic AI tools fail in drilling because:
 StrataSentry-NWIS is engineered from the ground up to solve these exact gaps by:
 1. **Unlocking Legacy WCR Archives**: Ingesting, parsing, and depth-indexing legacy reports with domain OCR and depth-aware semantic chunking into a high-performance vector retrieval store.
 2. **Real-Time Physics-ML Fusion**: Combining high-frequency WITSML telemetry with Bingham Plastic hydraulics, dynamic ECD, and soft-string torque & drag models validated against XGBoost and LSTM anomaly detectors.
-3. **Actionable Driller Advisory**: Providing 15–45 minute advance early warning with concrete, standardized standard operating procedures (SOPs) grounded in verified historical offset evidence.
+3. **Evidence-backed engineering review**: Surface relevant historical events and the actions previously recorded before a comparable interval is reached. Any operational action remains subject to the current drilling program and qualified engineering judgement; the prototype does not prescribe a universal SOP or claim a validated warning horizon.
 4. **Air-Gapped Rig-Site Autonomy**: Running fully self-contained on edge servers at the wellsite with sub-500ms latency.

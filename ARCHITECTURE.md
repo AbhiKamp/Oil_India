@@ -1,5 +1,7 @@
 # Architecture & System Design Document
-## StrataSentry-NWIS: National Well Intelligence System
+## StrataSentry-NWIS: Nearby Wells Intelligence System
+
+> Intended deployment architecture, not a record of verified running capabilities. The implemented local profile and limitations are documented in [delivery status](docs/delivery-status.md). Latency budgets, models, protocols, and edge synchronization below require separate implementation and validation.
 
 ---
 

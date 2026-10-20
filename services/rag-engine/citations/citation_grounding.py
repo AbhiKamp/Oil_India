@@ -1,6 +1,6 @@
 """
-StrataSentry-NWIS: Citation Grounding & Verification
-Validates that generated LLM responses are grounded in verified offset well documents.
+Source attribution for the extractive evidence summary.
+An exact excerpt match verifies attribution, not the scientific truth of a source.
 """
 
 from typing import List, Dict, Any

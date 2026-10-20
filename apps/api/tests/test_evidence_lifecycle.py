@@ -47,9 +47,29 @@ def test_local_cors_does_not_allow_arbitrary_websites():
                 "Origin": "https://untrusted.example", "Access-Control-Request-Method": "POST"})
             assert response.status_code == 400
             assert "access-control-allow-origin" not in response.headers
+            simple_post = await client.post("/api/v1/documents", headers={
+                "Origin": "https://untrusted.example"}, data={"well_id": "NHK-421"})
+            assert simple_post.status_code == 403
             local = await client.options("/api/v1/documents", headers={
                 "Origin": "http://127.0.0.1:41987", "Access-Control-Request-Method": "POST"})
             assert local.status_code == 200
             assert local.headers["access-control-allow-origin"] == "http://127.0.0.1:41987"
+
+    asyncio.run(check())
+
+
+def test_recorded_response_quotes_source_instead_of_inventing_an_outcome(tmp_path, monkeypatch):
+    monkeypatch.setenv("NWIS_DATA_DIR", str(tmp_path / "knowledge"))
+
+    async def check():
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+            records = (await client.get("/api/v1/events?well_id=MOR-118")).json()
+            assert "45-barrel" in records[0]["mitigation"]
+            assert "successfully freed after 14.5 hours" in records[0]["outcome"]
+            source = b"Incident Type: PACKOFF\nDepth: 200 m MD | Formation: Barail\nMitigation:\nRecorded action only.\n"
+            uploaded = (await client.post("/api/v1/documents", files={"file": ("actions.txt", source)},
+                                         data={"well_id": "NHK-412"})).json()
+            assert uploaded["events"][0]["mitigation"] == "Recorded action only."
+            assert uploaded["events"][0]["outcome"] is None
 
     asyncio.run(check())

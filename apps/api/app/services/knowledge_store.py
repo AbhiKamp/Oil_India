@@ -127,7 +127,7 @@ def list_events(well_id: str | None = None, q: str | None = None,
 
     result = []
     for item in source_events(well_id):
-        item.update({"review_state": "approved", "mitigation": None, "outcome": None,
+        item.update({"review_state": "approved",
                      "provenance": "synthetic", "original_name": item["source_file"],
                      "extraction_method": "text"})
         item.update(builtin_review(item["event_id"]) or {})
@@ -241,7 +241,8 @@ def save_decision(well_id: str, source_event: dict[str, Any], note: str, actor: 
                   status: str) -> dict[str, Any]:
     snapshot = {key: source_event.get(key) for key in (
         "event_id", "well_id", "event_type", "measured_depth_md_m", "formation", "excerpt",
-        "source_file", "page_marker", "page_reference_type", "review_state", "mitigation", "outcome")}
+        "source_file", "page_marker", "page_reference_type", "review_state", "mitigation", "outcome",
+        "provenance", "original_name", "extraction_method")}
     snapshot["source_well_id"] = source_event["well_id"]
     snapshot["target_well_id"] = well_id
     with connection() as db:

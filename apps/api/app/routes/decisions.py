@@ -31,7 +31,7 @@ async def create_decision(payload: dict = Body(...)):
     if event is None:
         event = next((item for item in source_events() if item["event_id"] == event_id), None)
         if event:
-            event.update({"review_state": "approved", "mitigation": None, "outcome": None})
+            event.update({"review_state": "approved", "provenance": "synthetic"})
             event.update(store.builtin_review(event_id) or {})
     if event is None:
         raise HTTPException(404, "Source event not found")

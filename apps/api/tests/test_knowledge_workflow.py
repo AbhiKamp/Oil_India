@@ -124,6 +124,8 @@ def test_event_extracts_adjacent_preceding_metadata_without_cross_event_leak(cli
 
 def test_pdf_pages_are_physical_and_malformed_pdf_rejected(client):
     async def check():
+        oversized_text = await client("POST", "/api/v1/documents", files=upload(b"a" * 2_000_001))
+        assert oversized_text.status_code == 413
         malformed = await client("POST", "/api/v1/documents", files=upload(b"%PDF-not a PDF", "broken.pdf"))
         assert malformed.status_code == 422
         too_many_pages = await client("POST", "/api/v1/documents", files=upload(pdf_bytes(101), "large.pdf"))
@@ -137,6 +139,8 @@ def test_pdf_pages_are_physical_and_malformed_pdf_rejected(client):
         assert [page["page_number"] for page in source.json()["pages"]] == [1, 2]
         physical = await client("GET", f"/api/v1/documents/{doc['document_id']}/file")
         assert physical.status_code == 200 and physical.content.startswith(b"%PDF-")
+        assert physical.headers["content-disposition"].startswith("inline;")
+        assert physical.headers["x-content-type-options"] == "nosniff"
         return doc
     run(check())
 

@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse
 from starlette.concurrency import run_in_threadpool
 
 from ..services import knowledge_store as store
-from ..services.report_data import REPORTS, formations as source_formations, reports
+from ..services.report_data import REPORTS, formations as source_formations, recorded_response, reports
 
 router = APIRouter(prefix="/api/v1/documents", tags=["Documents & Knowledge"])
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
@@ -59,7 +59,7 @@ def _events_from_pages(pages: list[dict], well_id: str, source_file: str) -> lis
                 "page_marker": page["page_number"],
                 "page_reference_type": "physical_pdf_page" if page.get("physical") else "text_source_page",
                 "extraction_method": page.get("extraction_method", "text"),
-                "review_state": "needs_review", "mitigation": None, "outcome": None,
+                "review_state": "needs_review", **recorded_response(excerpt),
             })
     return found
 
@@ -101,6 +101,8 @@ async def upload_document(file: UploadFile = File(...), well_id: str = Form(...)
             text = content.decode("utf-8")
         except UnicodeDecodeError as exc:
             raise HTTPException(422, "TXT must be UTF-8") from exc
+        if len(text) > MAX_EXTRACTED_CHARS:
+            raise HTTPException(413, "Text exceeds the 2 million character extraction limit")
         pages = [{"page_number": 1, "text": text}]
         parsed_status = "extracted"
     else:
@@ -233,7 +235,8 @@ async def get_document_file(document_name: str):
     path = store.data_dir() / row["stored_name"]
     if not path.is_file():
         raise HTTPException(404, "Stored PDF not found")
-    return FileResponse(path, media_type="application/pdf", filename=row["original_name"])
+    return FileResponse(path, media_type="application/pdf", filename=row["original_name"],
+                        content_disposition_type="inline", headers={"X-Content-Type-Options": "nosniff"})
 
 
 @router.get("/evidence")

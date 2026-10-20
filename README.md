@@ -108,6 +108,7 @@ The isolated video workspace is [`apps/video/`](apps/video/README.md). Its Remot
 ```bash
 cd apps/video
 npm ci
+# Generate the recorded capture/audio inputs first (see apps/video/README.md).
 npm run studio
 # When rendering with a system browser:
 npm run render -- --browser-executable=/usr/bin/chromium

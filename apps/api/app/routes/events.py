@@ -5,8 +5,6 @@ from fastapi import APIRouter, Body, HTTPException
 from ..services import knowledge_store as store
 from ..services.report_data import events as source_events, reports
 
-# Keep this router prefixless so it can register the sibling decisions contract
-# at its declared /api/v1/events path through main.py's existing router include.
 router = APIRouter(tags=["Historical Events"])
 
 
@@ -45,7 +43,7 @@ async def review_event(event_id: str, payload: dict = Body(...)):
         raise HTTPException(422, "measured_depth_md_m must be a finite non-negative metre value")
     base = next((item for item in source_events() if item["event_id"] == event_id), None)
     if base:
-        base.update({"review_state": "approved", "mitigation": None, "outcome": None})
+        base.update({"review_state": "approved", "provenance": "synthetic"})
         base.update(store.builtin_review(event_id) or {})
     updated = store.save_review(event_id, changes, reviewer.strip(), base)
     if updated is None:
