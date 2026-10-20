@@ -31,8 +31,9 @@ export default function DashboardPage() {
   const [docs, setDocs] = useState<DocumentRecord[]>([]);
   const [events, setEvents] = useState<ReviewEvent[]>([]);
   const [decisions, setDecisions] = useState<Decision[]>([]);
-  const [source, setSource] = useState<(SourceDocument & { name: string; page: number | null }) | null>(null);
+  const [source, setSource] = useState<(SourceDocument & { name: string; page: number | null; textMarker: number | null; referenceType: string }) | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
+  const selectedSourceRef = useRef<HTMLElement>(null);
   const [decisionEventId, setDecisionEventId] = useState('');
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
@@ -111,6 +112,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (source) dialog.current?.showModal();
     else if (dialog.current?.open) dialog.current.close();
+    if (source?.textMarker != null) requestAnimationFrame(() => selectedSourceRef.current?.scrollIntoView({ block: 'start' }));
   }, [source]);
 
   useEffect(() => {
@@ -172,12 +174,16 @@ export default function DashboardPage() {
   const activeFormation = formations.find((formation) => currentDepth != null && currentDepth >= formation.md_top && (formation.md_bottom == null || currentDepth < formation.md_bottom))?.formation_name;
   const currentFormation = activeFormation;
   const assistantFormation = activeFormation || active?.target_formation || 'Formation not reported';
+  const comparisonDepths = [...formations, ...compareFormations].flatMap((formation) =>
+    [formation.md_top, ...(formation.md_bottom == null ? [] : [formation.md_bottom])]);
+  const depthDomain = {min: Math.min(...comparisonDepths), max: Math.max(...comparisonDepths)};
 
   async function openSource(name: string, marker: number | null = null, eventId?: string, referenceType = '') {
     try {
       const document = await fetchDocumentSource(name);
-      const page = marker != null && referenceType === 'physical_pdf_page' ? marker : null;
-      setSource({ ...document, name: document.document_name, page });
+      const physicalPage = marker != null && referenceType === 'physical_pdf_page' ? marker : null;
+      const textMarker = marker != null && referenceType !== 'physical_pdf_page' ? marker : null;
+      setSource({ ...document, name: document.document_name, page: physicalPage, textMarker, referenceType });
       if (eventId) { setDecisionEventId(eventId); setView('handover'); }
     } catch (e) { setError(e instanceof Error ? e.message : 'Unable to open source'); }
   }
@@ -226,7 +232,7 @@ export default function DashboardPage() {
       <div className="demo-state"><span className="status-dot"/> SYNTHETIC DEMONSTRATION <span className="divider">/</span> READ-ONLY DECISION SUPPORT</div>
       <label className="active-selector"><span>ACTIVE WELL</span><select aria-label="Active well" value={wellId} onChange={(event) => setWellId(event.target.value)}>{wells.map((well) => <option key={well.well_id} value={well.well_id}>{well.well_name || well.well_id}</option>)}</select></label>
     </header>
-    <div className="intro"><div><p className="eyebrow">NEARBY WELLS INTELLIGENCE SYSTEM · {view.toUpperCase()}</p><h1>{view === 'operations' ? 'Context for the interval ahead.' : view === 'knowledge' ? 'Evidence, connected to its source.' : 'A decision carried to the next shift.'}</h1><p className="subhead">Historical well evidence for engineering review.</p></div><span className="data-label">Synthetic demonstration data · not field observations</span></div>
+     <div className="intro"><div><p className="eyebrow">NEARBY WELLS INTELLIGENCE SYSTEM · {view.toUpperCase()}</p><h1>{view === 'operations' ? 'Context for the interval ahead.' : view === 'knowledge' ? 'Evidence, connected to its source.' : 'A decision carried to the next shift.'}</h1><p className="subhead">Historical well evidence for engineering review.</p></div><div className="intro-status">{view==='operations'&&<div className="depth-readout"><span>ACTIVE WELL · {telemetry?'REPLAY DEPTH':'DEMO POSITION'}</span><strong>{active?.well_name||wellId||'—'}</strong><b>{currentDepth==null?'Depth unavailable':`${currentDepth.toLocaleString(undefined,{maximumFractionDigits:1})} m`} <small>MD</small></b><em>{currentFormation||active?.target_formation||'Formation not reported'}</em></div>}<span className="data-label">Synthetic demonstration data · not field observations</span></div></div>
     <nav className="view-tabs" role="tablist" aria-label="Dashboard views">{([['operations','Operations'],['knowledge','Knowledge & review'],['handover','Handover']] as const).map(([key,label]) => <button key={key} id={`tab-${key}`} role="tab" aria-selected={view === key} aria-controls={`${key}-view`} tabIndex={view === key ? 0 : -1} data-testid={`tab-${key}`} onClick={() => setView(key)} onKeyDown={(event) => { if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') { event.preventDefault(); const next = event.key === 'ArrowRight' ? (key === 'operations' ? 'knowledge' : key === 'knowledge' ? 'handover' : 'operations') : (key === 'operations' ? 'handover' : key === 'knowledge' ? 'operations' : 'knowledge'); setView(next); document.getElementById(`tab-${next}`)?.focus(); } }}>{label}</button>)}</nav>
     {error && <p className="notice" role="alert">{error}</p>}
 
@@ -254,7 +260,7 @@ export default function DashboardPage() {
 
         <article className="panel comparison-panel"><div className="panel-heading"><div><p className="eyebrow">GEOLOGICAL CONTEXT</p><h2>Formation comparison</h2></div><span className="method-label">DEPTH INTERVALS · MD</span></div>
           <label>Compare with <select aria-label="Comparison well" value={selectedWell} onChange={(event)=>setSelectedWell(event.target.value)}><option value={wellId}>{wellId} · active</option>{nearby.map((well)=><option key={well.well_id} value={well.well_id}>{well.well_name||well.well_id}</option>)}</select></label>
-          <div className="formation-tracks"><Track title={active?.well_name||wellId} items={formations}/><Track title={mapWells.find((well)=>well.well_id===selectedWell)?.well_name||selectedWell} items={compareFormations}/></div>
+          <div className="formation-tracks"><Track title={active?.well_name||wellId} items={formations} domain={depthDomain}/><Track title={mapWells.find((well)=>well.well_id===selectedWell)?.well_name||selectedWell} items={compareFormations} domain={depthDomain}/></div>
           <small className="comparison-caveat">Shared formation names are comparison cues, not validated correlation. Active survey: {trajectory.length} stations.</small>
         </article>
 
@@ -279,12 +285,19 @@ export default function DashboardPage() {
 
     {view === 'handover' && <section id="handover-view" role="tabpanel" aria-labelledby="tab-handover" className="workbench" data-testid="handover-workbench"><article className="panel"><p className="eyebrow">ENGINEER-RECORDED · SELF-ENTERED ACTOR</p><h2>Shift decision</h2><p>Decision target: active well <strong>{wellId||'—'}</strong>. Source event may belong to a historical offset well.</p><label htmlFor="decision-event">Historical source event</label><select id="decision-event" value={decisionEventId} onChange={(event)=>setDecisionEventId(event.target.value)}><option value="">Choose a reviewed event</option>{events.filter((event)=>event.review_state!=='rejected').map((event)=><option key={event.event_id} value={event.event_id}>{event.well_id} · {event.event_type} · {event.formation||'formation unknown'}</option>)}</select><label htmlFor="decision-note">Decision note</label><textarea id="decision-note" value={note} onChange={(event)=>setNote(event.target.value)} placeholder="Record evidence reviewed and context for the next shift"/><button disabled={!note.trim()||!decisionEventId||busy} onClick={()=>void decide()}>Save acknowledged decision</button></article><article className="panel"><div className="panel-heading"><h2>Handover log</h2><span>{decisions.length} ENTRIES</span></div>{decisions.length?decisions.map((decision,index)=><div className="decision-entry" key={decision.decision_id||index}><strong>{decision.status}</strong><p>{decision.note}</p><small>{decision.actor} · source event {decision.event_id}</small></div>):<p className="list-empty">No decisions recorded.</p>}</article></section>}
 
-    <dialog className="source-dialog" ref={dialog} aria-label={source?`Source ${source.name}`:'Source viewer'} onCancel={()=>setSource(null)}><section className="source-sheet"><div className="panel-heading"><div><p className="eyebrow">{source?.physical_pdf_available?'SOURCE PDF AVAILABLE':'TEXT SOURCE · PDF UNAVAILABLE'}{source?.page?` · PDF PAGE ${source.page}`:' · NO VERIFIED PDF PAGE REFERENCE'} · {source?.provenance||'PROVENANCE NOT REPORTED'}</p><h2>{source?.name}</h2></div><button onClick={()=>setSource(null)}>Close</button></div>{source?.physical_pdf_available&&<iframe title={`PDF source ${source.name}`} src={`${documentFileUrl(source.name)}${source.page?`#page=${source.page}`:''}`}/>}<div className="source-pages">{source?.pages?.length?source.pages.map((page)=><article key={page.page_number}><h3>Page {page.page_number}</h3><pre>{page.text}</pre></article>):<pre>{source?.text}</pre>}</div></section></dialog>
+    <dialog className="source-dialog" ref={dialog} aria-label={source?`Source ${source.name}`:'Source viewer'} onCancel={()=>setSource(null)}><section className="source-sheet"><div className="panel-heading"><div><p className="eyebrow">{source?.physical_pdf_available?'SOURCE PDF AVAILABLE':'TEXT SOURCE · PDF UNAVAILABLE'}{source?.page?` · PHYSICAL PDF PAGE ${source.page}`:source?.textMarker!=null?` · TEXT MARKER ${source.textMarker} · NOT A PDF PAGE`:' · NO VERIFIED PDF PAGE REFERENCE'} · {source?.provenance||'PROVENANCE NOT REPORTED'}</p><h2>{source?.name}</h2></div><button onClick={()=>setSource(null)}>Close</button></div>{source?.physical_pdf_available&&<iframe title={`PDF source ${source.name}`} src={`${documentFileUrl(source.name)}${source.page?`#page=${source.page}`:''}`}/>}<div className="source-pages">{source?.pages?.length?source.pages.map((page)=>{const isTextMarker=source.textMarker===page.page_number;return <article key={page.page_number} ref={isTextMarker?selectedSourceRef:null} className={isTextMarker?'source-cited':''}><h3>{source.referenceType==='physical_pdf_page'?`PDF page ${page.page_number}`:isTextMarker?`Text marker ${page.page_number}`:`Text section ${page.page_number}`}{isTextMarker?' · cited evidence':''}</h3><pre>{page.text}</pre></article>}):<pre ref={selectedSourceRef as React.RefObject<HTMLPreElement>} className={source?.textMarker!=null?'source-cited':''}>{source?.text}</pre>}</div></section></dialog>
     <footer className="footer"><span>STRATASENTRY NWIS · READ-ONLY DECISION SUPPORT</span><span>SYNTHETIC DEMONSTRATION · NOT FIELD DATA</span></footer>
   </main>;
 }
 
-function Track({title,items}:{title:string;items:FormationTop[]}) { return <div className="formation-track"><h3>{title}</h3>{items.length?items.map((formation,index)=><div className="formation-row" key={`${formation.formation_name}-${index}`}><strong>{formation.formation_name}</strong><span>{formation.md_top.toLocaleString()} m MD{formation.md_bottom==null?'':` – ${formation.md_bottom.toLocaleString()} m MD`}</span>{index===0&&<small>{formation.method||'Method not reported'}{formation.source_file?` · ${formation.source_file}`:''}</small>}</div>):<p className="list-empty">Formation records unavailable.</p>}</div>; }
+function Track({title,items,domain}:{title:string;items:FormationTop[];domain:{min:number;max:number}}) {
+  const {min,max}=domain;
+  return <div className="formation-track"><h3>{title}</h3>{items.length? <div className="formation-depths" aria-label={`${title} formation depth intervals`}>
+    <div className="depth-axis"><span>{min.toLocaleString()} m</span><span>{max.toLocaleString()} m MD</span></div>
+    <div className="depth-bands">{items.map((formation,index)=>{const bottom=formation.md_bottom??formation.md_top;const topPct=max===min?0:((formation.md_top-min)/(max-min))*100;const height=max===min?0:Math.max(0,((bottom-formation.md_top)/(max-min))*100);return <div className="depth-band" key={`${formation.formation_name}-${index}`} style={{top:`${topPct}%`,height:`${height}%`}} title={`${formation.formation_name}: ${formation.md_top}–${formation.md_bottom??'not reported'} m MD`}><strong>{formation.formation_name}</strong><span>{formation.md_top.toLocaleString()} m MD{formation.md_bottom==null?'':` – ${formation.md_bottom.toLocaleString()}`}</span></div>;})}</div>
+    <div className="formation-row"><small>{items[0].method||'Method not reported'}{items[0].source_file?` · ${items[0].source_file}`:''}</small></div>
+  </div>:<p className="list-empty">Formation records unavailable.</p>}</div>;
+}
 
 function ReviewCard({event,onReview,onSource,onError}:{event:ReviewEvent;onReview:(state:ReviewEvent['review_state'])=>Promise<void>;onSource:()=>void;onError:(error:string)=>void}) {
   async function update(state:ReviewEvent['review_state']) { try { await onReview(state); } catch (error) { onError(error instanceof Error?error.message:'Event review failed'); } }

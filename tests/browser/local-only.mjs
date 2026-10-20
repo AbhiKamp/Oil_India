@@ -30,6 +30,15 @@ try {
   await page.goto(process.env.NWIS_DASHBOARD_URL || 'http://127.0.0.1:41987');
   await page.locator('.well-row').nth(2).waitFor();
   assert.equal(await page.locator('.well-row').count(), 3);
+  await page.locator('.depth-axis').nth(1).waitFor();
+  const scales = await page.locator('.depth-axis').allTextContents();
+  assert.equal(scales[0], scales[1], 'formation columns must use a shared MD scale');
+  const aligned = await page.locator('.formation-depths').first().evaluate(element => {
+    const axis = element.querySelector('.depth-axis').getBoundingClientRect();
+    const bands = element.querySelector('.depth-bands').getBoundingClientRect();
+    return Math.abs(axis.bottom - bands.bottom) < 1;
+  });
+  assert.ok(aligned, 'the depth axis must end at the bottom of the bands');
   const updated = page.waitForResponse(response => response.url().includes('/nearby?radius_km=5'));
   await page.getByLabel('Search radius in kilometres').focus();
   await page.getByLabel('Search radius in kilometres').press('Home');
@@ -38,6 +47,8 @@ try {
   await page.getByRole('button', {name: /WCR_NHK_412.txt.*inspect source/}).click();
   await page.getByRole('dialog').waitFor();
   assert.match(await page.getByRole('dialog').innerText(), /18-barrel pit gain/);
+  await page.waitForFunction(() => document.querySelector('.source-pages')?.scrollTop > 0);
+  assert.match(await page.locator('.source-cited').innerText(), /Text marker 24/);
   await page.getByRole('button', {name: 'Close', exact: true}).click();
   assert.deepEqual(external, []);
   assert.deepEqual(scriptErrors, []);
