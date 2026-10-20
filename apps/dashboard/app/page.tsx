@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const [view, setView] = useState<View>('operations');
   const [wells, setWells] = useState<Well[]>([]);
   const [wellId, setWellId] = useState('');
+  const [uploadWellId, setUploadWellId] = useState('');
   const [radius, setRadius] = useState(50);
   const [nearby, setNearby] = useState<Well[]>([]);
   const [selectedWell, setSelectedWell] = useState('');
@@ -53,7 +54,7 @@ export default function DashboardPage() {
   const replayGeneration = useRef(0);
 
   useEffect(() => {
-    fetchWells().then((items) => { setWells(items); setWellId(items[0]?.well_id || ''); })
+    fetchWells().then((items) => { setWells(items); setWellId(items[0]?.well_id || ''); setUploadWellId(items[0]?.well_id || ''); })
       .catch((e) => setError(e.message));
   }, []);
 
@@ -189,10 +190,10 @@ export default function DashboardPage() {
   }
 
   async function upload(file?: File) {
-    if (!file || !wellId) return;
+    if (!file || !uploadWellId) return;
     setBusy(true); setError('');
     try {
-      const uploaded = await uploadDocument(file, wellId);
+      const uploaded = await uploadDocument(file, uploadWellId);
       setDocs((all) => [uploaded, ...all.filter((doc) => doc.document_name !== uploaded.document_name)]);
       setEvents(await fetchReviewEvents());
     } catch (e) { setError(e instanceof Error ? `Upload or event refresh failed: ${e.message}` : 'Upload or event refresh failed'); }
@@ -278,7 +279,7 @@ export default function DashboardPage() {
     </>}
 
     {view === 'knowledge' && <section id="knowledge-view" role="tabpanel" aria-labelledby="tab-knowledge" className="workbench" data-testid="documents-workbench">
-      <article className="panel workbench-upload"><p className="eyebrow">DOCUMENT LIBRARY · SYNTHETIC PROVENANCE</p><h2>Bring a report into review</h2><p>Uploaded report provenance is explicitly marked synthetic.</p><label className="upload-control">Choose PDF<input aria-label="Upload synthetic PDF" type="file" accept="application/pdf,.pdf" disabled={busy} onChange={(event)=>void upload(event.target.files?.[0])}/></label>{busy&&<p role="status">Uploading and refreshing event records…</p>}</article>
+      <article className="panel workbench-upload"><p className="eyebrow">DOCUMENT LIBRARY · SYNTHETIC PROVENANCE</p><h2>Bring a report into review</h2><p>Uploaded report provenance is explicitly marked synthetic.</p><label htmlFor="upload-well">Report well</label><select id="upload-well" aria-label="Report well" value={uploadWellId} onChange={(event)=>setUploadWellId(event.target.value)}>{wells.map((well)=><option key={well.well_id} value={well.well_id}>{well.well_name||well.well_id}</option>)}</select><label className="upload-control">Choose PDF<input aria-label="Upload synthetic PDF" type="file" accept="application/pdf,.pdf" disabled={busy} onChange={(event)=>void upload(event.target.files?.[0])}/></label>{busy&&<p role="status">Uploading and refreshing event records…</p>}</article>
       <article className="panel"><div className="panel-heading"><h2>Documents</h2><span>{docs.length} RECORDS</span></div>{docs.length?docs.map((doc)=><div className="document-row" key={doc.document_id||doc.document_name}><div><strong>{doc.original_name||doc.document_name}</strong><small>{doc.well_name||'Well not reported'} · {doc.type||doc.source_format||'type not reported'} · {doc.status||'status not reported'}</small></div><div>{doc.physical_pdf_available&&<a href={documentFileUrl(doc.document_name)} target="_blank" rel="noreferrer">Open PDF</a>} <button onClick={()=>void openSource(doc.document_name)}>Inspect</button></div></div>):<p className="list-empty">No documents returned.</p>}</article>
       <article className="panel"><div className="panel-heading"><h2>Event review</h2><span>{events.length} EVENTS</span></div>{events.length?events.map((event)=><ReviewCard key={event.event_id} event={event} onReview={async(state)=>{await reviewEvent(event.event_id,state,'Engineer');setEvents((all)=>all.map((item)=>item.event_id===event.event_id?{...item,review_state:state}:item))}} onSource={()=>void openSource(event.source_file,event.page_marker,event.event_id,event.page_reference_type)} onError={setError}/>):<p className="list-empty">No events returned.</p>}</article>
     </section>}
