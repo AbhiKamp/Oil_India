@@ -58,3 +58,5 @@ qdrant_storage/
 # Python junction aliases (auto-created by scripts/link_services.py)
 services/*_*
 
+# Local code graph generated during project initialization
+graphify-out/
