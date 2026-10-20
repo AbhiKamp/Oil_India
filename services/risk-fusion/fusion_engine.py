@@ -1,6 +1,6 @@
 """
 StrataSentry-NWIS: Master Risk Fusion Engine
-Performs Bayesian and weighted fusion of ML anomaly scores, physics rule violations, and offset historical precedent.
+Combines uncalibrated signal rules and source context for the synthetic prototype.
 """
 
 from typing import Dict, Any, List, Optional
@@ -57,27 +57,27 @@ class RiskFusionEngine:
             spp_slope = features.get("spp_slope_psi_sec", 0.0)
             if spp_slope > 2.0:
                 physics_severity = min(1.0, 0.4 + (spp_slope / 10.0) * 0.5)
-                mechanism = "ANNULAR_CUTTINGS_ACCUMULATION_AND_COAL_CAVING"
+                mechanism = "PRESSURE_RISE_WITH_TORQUE_VARIABILITY_AND_FALLING_ROP"
         elif dominant_hazard == "GAS_KICK":
             flow_delta = features.get("flow_delta_lpm", 0.0)
             if flow_delta > 100.0:
                 physics_severity = min(1.0, 0.5 + (flow_delta / 500.0) * 0.4)
-                mechanism = "FORMATION_FLUID_INFLUX_MASS_IMBALANCE"
+                mechanism = "PIT_GAIN_WITH_EXCESS_RETURN_FLOW"
         elif dominant_hazard == "LOST_CIRCULATION":
             flow_delta = features.get("flow_delta_lpm", 0.0)
             if flow_delta < -100.0:
                 physics_severity = min(1.0, 0.5 + (abs(flow_delta) / 500.0) * 0.4)
-                mechanism = "HYDROSTATIC_FRACTURE_OR_DEPLETED_SAND_LOSS"
+                mechanism = "PIT_LOSS_WITH_RETURN_FLOW_DEFICIT"
         elif dominant_hazard == "DIFFERENTIAL_STICKING":
             if features.get("rop", 10.0) < 1.0:
                 physics_severity = 0.60
-                mechanism = "MUD_CAKE_IMBEDDING_ACROSS_DEPLETED_SAND"
+                mechanism = "LOW_ROP_WITH_HEURISTIC_OVERBALANCE_INDICATOR"
 
         # 3. If normal drilling is dominant (>0.60) and physics shows no hazard
         if ml_probs.get("normal", 0.0) > 0.65 and physics_severity < 0.2:
             dominant_hazard = "NORMAL_DRILLING"
             hazard_prob = 1.0 - ml_probs.get("normal", 0.0)
-            mechanism = "STABLE_FORMATION_DRILLING"
+            mechanism = "NO_CONFIGURED_ADVERSE_SIGNAL_PATTERN"
         else:
             hazard_prob = dominant_prob
 
@@ -110,5 +110,7 @@ class RiskFusionEngine:
             physics_severity=physics_severity,
             mechanism=mechanism,
             recommendations=recommendations,
-            citations=offset_evidence or []
+            citations=offset_evidence or [],
+            observation_timestamp=ml_prediction.get("observation_timestamp"),
+            method_version="heuristic-risk-v1"
         )

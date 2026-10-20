@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import './workbench.css';
 
 export const metadata: Metadata = {
-  title: 'StrataSentry-NWIS | Tactical Drilling Operations HUD',
-  description: 'National Well Intelligence System & Real-Time Drilling Hazard Mitigation Platform',
+  title: 'StrataSentry NWIS | Nearby Wells Intelligence System',
+  description: 'Read-only drilling decision support with source-linked well context.',
 };
 
 export default function RootLayout({

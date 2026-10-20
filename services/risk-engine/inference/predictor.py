@@ -86,5 +86,14 @@ class DrillingRiskPredictor:
             "features": features,
             "ml_probabilities": ml_probs,
             "lstm_anomaly": lstm_res,
-            "active_thresholds": thresholds
+            "active_thresholds": thresholds,
+            "observation_timestamp": telemetry_window[-1].get("timestamp"),
+            "model_metadata": {
+                "method": "handwritten_heuristic_baseline",
+                "trained_model_loaded": False,
+                "calibrated": False,
+                "training_data": "none; no source training set or evaluation artifact loaded",
+                "probability_semantics": "uncalibrated heuristic scores",
+                "anomaly_detector": lstm_res["method"]
+            }
         }

@@ -30,6 +30,7 @@ class LSTMAnomalyDetector:
         anomaly_confidence = round(min(1.0, loss / (self.threshold * 2.0)), 3)
 
         return {
+            "method": "untrained_numpy_projection_heuristic",
             "reconstruction_loss": round(loss, 4),
             "anomaly_threshold": self.threshold,
             "is_anomaly": is_anomalous,

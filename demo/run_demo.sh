@@ -22,5 +22,5 @@ else
 fi
 
 # 2. Launch Telemetry Simulator with Pack-off Hazard Injection
-echo "[*] Replaying telemetry with induced pack-off anomaly at 2,845m MD..."
-python scripts/simulate_telemetry.py --well NHK-421 --rate-hz 2 --inject-incident packoff
+echo "[*] Replaying explicitly synthetic pack-off scenario..."
+python scripts/simulate_telemetry.py --well NHK-421 --rate-hz 2 --inject-incident packoff --reset

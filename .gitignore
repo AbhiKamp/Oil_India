@@ -60,3 +60,8 @@ services/*_*
 
 # Local code graph generated during project initialization
 graphify-out/
+
+# Local knowledge store and uploaded reports
+.local/
+.venv/
+*.tsbuildinfo

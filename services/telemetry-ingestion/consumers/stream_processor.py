@@ -5,6 +5,7 @@ Maintains an in-memory sliding buffer and computes rolling temporal derivatives.
 
 from collections import deque
 from typing import Dict, Any, List, Optional
+from datetime import datetime, timezone
 import numpy as np
 
 class TelemetryStreamProcessor:
@@ -16,6 +17,10 @@ class TelemetryStreamProcessor:
         """
         Appends frame to buffer and computes rolling derivatives.
         """
+        frame = dict(frame)
+        if not frame.get("timestamp"):
+            frame["timestamp"] = datetime.now(timezone.utc).isoformat()
+            frame["timestamp_source"] = "ingestion_time"
         self.buffer.append(frame)
         derivatives = self._compute_derivatives()
         enriched_frame = dict(frame)
@@ -28,7 +33,8 @@ class TelemetryStreamProcessor:
                 "spp_rate_of_change_psi_sec": 0.0,
                 "torque_std_30s": 0.0,
                 "flow_delta": 0.0,
-                "mse_mepa": 0.0
+                "mse_mepa": 0.0,
+                "derivative_basis": "per_sample"
             }
 
         spp_vals = [f["standpipe_pressure"] for f in self.buffer]
@@ -39,8 +45,8 @@ class TelemetryStreamProcessor:
         torque = self.buffer[-1]["surface_torque"]
 
         # SPP slope over last 10 points
-        spp_subset = spp_vals[-10:]
-        spp_slope = float(np.polyfit(range(len(spp_subset)), spp_subset, 1)[0]) if len(spp_subset) >= 2 else 0.0
+        spp_frames = list(self.buffer)[-10:]
+        spp_slope, derivative_basis = self._slope(spp_frames, "standpipe_pressure")
 
         # Torque standard deviation
         torque_std = float(np.std(torque_vals[-30:])) if len(torque_vals) >= 2 else 0.0
@@ -57,10 +63,35 @@ class TelemetryStreamProcessor:
 
         return {
             "spp_rate_of_change_psi_sec": round(spp_slope, 2),
+            "derivative_basis": derivative_basis,
             "torque_std_30s": round(torque_std, 2),
             "flow_delta": round(self.buffer[-1]["flow_in"] * (self.buffer[-1]["flow_out_pct"] / 100.0 - 1.0), 1),
             "mse_ksi": round(mse_val, 2)
         }
+
+    @staticmethod
+    def _slope(frames: List[Dict[str, Any]], key: str):
+        values = np.asarray([float(frame.get(key, 0.0)) for frame in frames], dtype=float)
+        if len(values) < 2:
+            return 0.0, "per_sample"
+        try:
+            if any(frame.get("timestamp_source") == "ingestion_time" for frame in frames):
+                raise ValueError("source timestamps absent")
+            parsed = [
+                value if isinstance(value, datetime) else datetime.fromisoformat(
+                    str(value).replace("Z", "+00:00")
+                ) for value in (frame.get("timestamp") for frame in frames)
+            ]
+            parsed = [value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value for value in parsed]
+            seconds = np.asarray([value.timestamp() for value in parsed], dtype=float)
+            elapsed = seconds - seconds[0]
+            if not np.all(np.isfinite(elapsed)) or np.any(np.diff(elapsed) <= 0):
+                raise ValueError("timestamps are not strictly increasing")
+            basis = "timestamp_seconds"
+        except (TypeError, ValueError, OverflowError):
+            elapsed = np.arange(len(values), dtype=float)
+            basis = "per_sample"
+        return float(np.polyfit(elapsed, values, 1)[0]), basis
 
     def get_recent_history(self, count: int = 30) -> List[Dict[str, Any]]:
         return list(self.buffer)[-count:]

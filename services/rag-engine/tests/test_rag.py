@@ -78,3 +78,59 @@ def test_rag_retriever_and_copilot():
     assert "MOR-118" in resp["answer"]
     assert len(resp["citations"]) >= 1
     assert resp["citations"][0]["well_name"] == "MOR-118"
+    assert "2,400 lpm" not in resp["answer"].lower()
+    assert "45-bbl" not in resp["answer"].lower()
+
+def test_copilot_abstains_without_evidence():
+    copilot = llm_mod.MistralDrillingCopilot()
+    resp = copilot.generate_advisory(
+        query="What should I do about a kick?",
+        current_depth=2845.0,
+        formation="Barail Coal-Shale",
+        evidence_chunks=[]
+    )
+    assert "insufficient retrieved evidence" in resp["answer"].lower()
+    assert resp["citations"] == []
+    assert "NHK-412" not in resp["answer"]
+    assert "1.34" not in resp["answer"]
+
+def test_copilot_does_not_invent_citation_for_missing_metadata():
+    copilot = llm_mod.MistralDrillingCopilot()
+    resp = copilot.generate_advisory(
+        query="What happened?",
+        current_depth=2845.0,
+        formation="Barail Coal-Shale",
+        evidence_chunks=[{"text": "A reported event."}]
+    )
+    assert "A reported event." in resp["answer"]
+    assert resp["citations"] == []
+
+
+def test_lexical_search_does_not_rank_by_unrelated_raw_depth_or_random_vectors():
+    retriever = retriever_mod.QdrantRetriever()
+    chunks = [
+        {"chunk_id": "irrelevant", "well_name": "B", "formation_name": "Barail", "md_top": 2845,
+         "text": "Cement placement completed."},
+        {"chunk_id": "relevant", "well_name": "A", "formation_name": "Barail", "md_top": 3500,
+         "text": "Mechanical pack-off and stuck pipe were recorded.", "page_number": None},
+    ]
+    retriever.add_local_chunks(chunks)
+    retriever.add_local_chunks(chunks)
+    assert len(retriever.local_chunks) == 2
+    results = retriever.retrieve("packoff stuck pipe", formation="Barail", depth_md=2845)
+    assert [row["chunk_id"] for row in results] == ["relevant"]
+    assert results[0]["page_number"] is None
+    assert results[0]["retrieval_method"] == "local_lexical_search"
+    assert retriever.retrieve("unrelated satellite equipment") == []
+
+
+def test_token_vectors_are_stable_and_do_not_mutate_numpy_random_state():
+    import numpy as np
+    embedder = embedder_mod.DomainEmbedder()
+    np.random.seed(7)
+    expected = np.random.random()
+    np.random.seed(7)
+    a = embedder.embed_text("stuck pipe")
+    b = embedder.embed_text("pipe stuck")
+    assert a == b
+    assert np.random.random() == expected

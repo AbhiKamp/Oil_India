@@ -16,6 +16,7 @@ def load_mod(name, rel_path):
     return mod
 
 pred_mod = load_mod("predictor", "inference/predictor.py")
+features_mod = load_mod("drilling_features", "feature_engineering/drilling_features.py")
 
 def test_risk_predictor_normal_drilling():
     predictor = pred_mod.DrillingRiskPredictor()
@@ -62,3 +63,47 @@ def test_risk_predictor_packoff_detection():
     res = predictor.evaluate_window(window, formation="Barail Coal-Shale")
     assert res["ml_probabilities"]["hole_packoff"] > 0.40
     assert res["ml_probabilities"]["hole_packoff"] > res["ml_probabilities"]["normal"]
+
+
+def test_true_time_derivatives_are_sampling_rate_invariant():
+    engineer = features_mod.DrillingFeatureEngineer()
+    outputs = []
+    for interval in (1, 2):
+        window = [
+            {
+                "timestamp": f"2026-01-01T00:00:{i * interval:02d}+00:00",
+                "standpipe_pressure": 1000 + (i * interval * 4),
+                "pit_volume": 20 + (i * interval * 0.01),
+            }
+            for i in range(5)
+        ]
+        outputs.append(engineer.extract_features(window))
+    assert outputs[0]["spp_slope_psi_sec"] == outputs[1]["spp_slope_psi_sec"]
+    assert outputs[0]["pit_rate_m3_min"] == outputs[1]["pit_rate_m3_min"]
+    assert outputs[0]["derivative_basis"] == "timestamp_seconds"
+
+
+def test_heuristic_scenarios_and_rng_isolation():
+    predictor = pred_mod.DrillingRiskPredictor()
+    normal = predictor.evaluate_window([{
+        "measured_depth": 100, "rop": 14, "wob": 12, "surface_torque": 10,
+        "rotary_rpm": 100, "standpipe_pressure": 2000, "flow_in": 2000,
+        "flow_out_pct": 100, "pit_volume": 40,
+    }])
+    packoff = predictor.stuck_pipe_model.predict_risk({
+        "spp_slope_psi_sec": 8, "torque_std": 5, "rop": 4, "flow_delta_lpm": -700,
+    })
+    kick = predictor.kick_model.predict_risk({"pit_rate_m3_min": 0.2, "flow_delta_lpm": 200})
+    false_kick = predictor.kick_model.predict_risk({"pit_rate_m3_min": 0, "flow_delta_lpm": 200})
+    assert normal["ml_probabilities"]["normal"] > 0.70
+    assert packoff["hole_packoff"] > packoff["normal"]
+    assert kick["gas_kick"] > kick["normal"]
+    assert false_kick["normal"] > false_kick["gas_kick"]
+    assert normal["model_metadata"]["trained_model_loaded"] is False
+
+    import numpy as np
+    np.random.seed(123)
+    expected = np.random.random()
+    np.random.seed(123)
+    pred_mod.DrillingRiskPredictor()
+    assert np.random.random() == expected

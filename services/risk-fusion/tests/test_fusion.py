@@ -41,4 +41,28 @@ def test_risk_fusion_packoff():
     assert alert["severity"] in ["WARNING", "CRITICAL"]
     assert alert["confidence_score"] > 0.60
     assert len(alert["detailed_sop"]) >= 3
-    assert "Stop drilling ahead" in alert["driller_action_summary"]
+    assert "Review the hole packoff assessment" in alert["driller_action_summary"]
+    assert "2,400" not in " ".join(alert["detailed_sop"])
+    assert alert["lead_time_seconds"] == 0
+    assert alert["lead_time_basis"] == "not_estimated"
+    assert alert["numeric_score_type"] == "uncalibrated_heuristic_score"
+
+def test_severity_does_not_claim_incident_countdown():
+    severity, lead_time = fusion_mod.SeverityCalculator.calculate_severity(0.9, 0.9)
+    assert severity == "CRITICAL"
+    assert lead_time == 0
+
+
+def test_same_observation_produces_stable_alert_identity_and_time():
+    engine = fusion_mod.RiskFusionEngine()
+    prediction = {
+        "observation_timestamp": "2026-01-01T00:00:00+00:00",
+        "ml_probabilities": {"normal": 0.9, "hole_packoff": 0.03, "differential_sticking": 0.02,
+                             "gas_kick": 0.03, "lost_circulation": 0.02},
+        "features": {"spp_slope_psi_sec": 0, "flow_delta_lpm": 0},
+    }
+    first = engine.fuse_risk_assessment("W1", 100, "F", prediction, {})
+    second = engine.fuse_risk_assessment("W1", 100, "F", prediction, {})
+    assert first["alert_id"] == second["alert_id"]
+    assert first["timestamp"] == second["timestamp"] == prediction["observation_timestamp"]
+    assert first["method_version"] == "heuristic-risk-v1"

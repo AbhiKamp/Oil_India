@@ -13,17 +13,21 @@ class CitationGroundingVerifier:
         Parses citations and attaches verified source metadata.
         """
         citations = []
-        known_wells = {c.get("well_name"): c for c in evidence_chunks if c.get("well_name")}
-
-        for well_name, chunk in known_wells.items():
-            if well_name.lower() in llm_response.lower():
+        for chunk in evidence_chunks:
+            well_name = chunk.get("well_name")
+            excerpt = (chunk.get("text") or "").strip()
+            if well_name and excerpt and well_name.casefold() in llm_response.casefold() and excerpt in llm_response:
                 citations.append({
                     "well_name": well_name,
-                    "formation": chunk.get("formation_name", "Unknown"),
-                    "depth_interval_md": f"{chunk.get('md_top', 0)} - {chunk.get('md_bottom', 0)} m",
-                    "page_reference": chunk.get("page_number", 1),
-                    "confidence": 0.96,
-                    "verified": True
+                    "formation": chunk.get("formation_name"),
+                    "md_top": chunk.get("md_top"),
+                    "md_bottom": chunk.get("md_bottom"),
+                    "document_name": chunk.get("document_name"),
+                    "chunk_id": chunk.get("chunk_id"),
+                    "page_number": chunk.get("page_number"),
+                    "page_reference": chunk.get("page_number"),
+                    "page_reference_type": chunk.get("page_reference_type"),
+                    "verification": "exact_retrieved_excerpt_present_not_independent_fact_validation",
                 })
 
         return citations

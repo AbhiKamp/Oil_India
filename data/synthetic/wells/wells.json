@@ -7,6 +7,8 @@
     "field": "Naharkatiya",
     "block": "Greater Naharkatiya PML",
     "status": "DRILLING_ACTIVE",
+    "current_depth_md": 2845.1,
+    "current_depth_provenance": "SYNTHETIC DEMO PROGRESS MARKER - NOT LIVE TELEMETRY",
     "surface_latitude": 27.2842,
     "surface_longitude": 95.3418,
     "elevation_kb_m": 115.0,

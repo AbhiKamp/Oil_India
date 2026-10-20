@@ -6,19 +6,21 @@
 - NWIS means **Nearby Wells Intelligence System**. It is a read-only decision-support concept beside eRTMAC, not a rig-control system.
 - Canonical repository: https://github.com/Fadhil006/Oil_India. The local `origin` was still configured as `AbhiKamp/Oil_India` at initialization; inspect it before pushing.
 - The submitted presentation is `Healix-1_SIH-2026_PS-26121_Submission.pdf` at repository root. Do not confuse it with the synthetic report in `demo/`.
-- Start new implementation work with `docs/prototype-plan.md`, `docs/video-plan.md`, and `docs/implementation-handoff.md`. These are plans, not descriptions of implemented features.
+- Start new implementation work with `docs/prototype-plan.md`, `docs/video-plan.md`, and `docs/implementation-handoff.md`. These are plans, not descriptions of implemented features; `docs/delivery-status.md` records the implemented local scope and limitations.
 
 ## Repository layout
 
 - `apps/api/`: FastAPI gateway (`app/main.py`), route handlers, schemas, and an orchestrator bridging domain services.
-- `apps/dashboard/`: Next.js 14 / React 18 / TypeScript UI; `app/` contains the entry page and styles, `components/` contains operations panels. The page currently imports `lib/api` and `lib/types`, but `lib/` is absent in this checkout.
-- `services/`: document extraction, telemetry, geometry, formation correlation, risk, physics, retrieval, and fusion implementations. Directories use hyphens; some API imports use underscore names. `scripts/link_services.py` is Windows-specific. Check packaging before assuming the API starts on Linux.
+- `apps/dashboard/`: Next.js 15 / React 18 / TypeScript UI; `app/` contains operations, source/review, and handover views; `lib/` contains typed API contracts. Its nested `.gitignore` makes `lib/` trackable despite the root Python `lib/` rule.
+- `apps/video/`, `demo/capture/`, `docs/media/`: isolated Remotion composition, real browser capture tooling, transcript/asset records. Video exports belong in ignored `out/`, not normal Git history.
+- `services/`: document extraction, telemetry, geometry, formation correlation, risk, physics, retrieval, and fusion implementations. Directories use hyphens; `apps/api/app/service_packages.py` registers portable underscore aliases. The old `scripts/link_services.py` is Windows-specific and is not needed for the verified local API.
 - `data/synthetic/`, `data/schemas/`, `demo/`: synthetic wells, surveys, telemetry, reports, schemas, and demo assets. Synthetic data is not OIL field data.
-- `models/`: model training/evaluation scripts; some runtime model code currently uses heuristic stand-ins. Do not describe these as validated trained models.
+- `models/`: legacy model scripts plus `experimental/`, a genuinely trained NumPy classifier with grouped synthetic evaluation. The runtime alert baseline still uses uncalibrated heuristics; do not describe it as trained XGBoost/LSTM or confuse synthetic model results with field validation.
 - `database/`, `infrastructure/`, `monitoring/`, `security/`: SQL/configuration and supporting modules. README architecture includes intended deployment components, not all proven running services.
 - `tests/` plus `apps/api/tests/` and service-local `tests/`: integration, API, domain, and performance checks.
 - `docs/`, `architecture/`: system documentation, planning documents, and diagrams.
-- `.agents/skills/remotion-best-practices/`: upstream Remotion video-production guidance; source recorded in `skills-lock.json`. Restart OpenCode to discover the newly installed skill. No video application has been created yet.
+- `.agents/skills/remotion-best-practices/`: upstream Remotion video-production guidance; source recorded in `skills-lock.json`. Restart OpenCode after skill configuration changes.
+- `.local/nwis/` (ignored): SQLite knowledge/review/decision store and content-addressed uploaded files. `NWIS_DATA_DIR` overrides this path; use a temporary directory in persistence tests.
 
 ## Existing conventions and constraints
 
@@ -27,6 +29,8 @@
 - Keep engineering measurements explicit about units, depth reference (MD versus TVD), source document/page, and synthetic versus observed status. Avoid unsupported operational recommendations or confident risk probabilities.
 - Keep local secrets in `.env` files (ignored); use `.env.example` for documented settings. Do not commit rendered video binaries or generated local graph caches by default.
 - Do not claim production eRTMAC connectivity, air-gapped operation, OCR, or ML performance until tested on the actual implementation.
+- Keep uploaded events out of operational retrieval until approved. Do not treat text-report page markers as verified physical PDF pages. Historical offset events may be linked to a decision for the active well; preserve both identities.
+- Reviewer identity is self-entered in the local prototype, not authenticated. Bind the demo to loopback; do not expose the local upload/control profile publicly.
 - Do not rewrite or replace the submitted PDF without explicit instruction. Use accurate team identity and repository URL in new materials.
 
 ## Commands and verified status (20 October 2026)
@@ -35,17 +39,21 @@ From the repository root unless stated otherwise:
 
 | Command | Purpose | Verified result here |
 | --- | --- | --- |
-| `python -m pip install -r apps/api/requirements.txt` | Install API/test dependencies | Documented in README/Makefile; not run |
-| `npm ci` in `apps/dashboard` | Install locked dashboard dependencies | Suggested clean install; not run |
-| `pytest services/ tests/ apps/api/tests/ -v` | Repository test suite | Attempted; `pytest: command not found` (dependencies not installed) |
-| `npm run build` in `apps/dashboard` | Production UI build | Attempted; `next: command not found` (node dependencies not installed) |
+| `python -m pip install -r apps/api/requirements.txt` | Install API/test dependencies | Installed into `/tmp/opencode/oil-api-venv` during implementation; not system-wide |
+| `npm ci` in `apps/dashboard` | Install locked dashboard dependencies | Run successfully; current dependency versions are in package-lock.json |
+| `python -m pytest services/ tests/ apps/api/tests/ -q` | Repository test suite | Passed in the implementation environment; `pytest.ini` uses importlib mode for service directories |
+| `npm run build` in `apps/dashboard` | Production UI build | Passed after restoring typed client and upgrading to Next.js 15 |
 | `python scripts/seed_database.py` | Seed the synthetic database | Present in README/Makefile; not run |
-| `uvicorn apps.api.app.main:app --host 0.0.0.0 --port 8000 --reload` | Local API | Present in README/Makefile; not run; packaging problem noted above |
-| `npm run dev` in `apps/dashboard` | Local dashboard | Documented; not run |
-| `python scripts/simulate_telemetry.py --well NHK-421 --rate-hz 2 --inject-incident packoff` | Synthetic telemetry | Documented; not run |
+| `uvicorn apps.api.app.main:app --host 127.0.0.1 --port 8000` | Local API | Started successfully; HTTP health and source/nearby/event endpoints exercised |
+| `npm run dev -- --hostname 127.0.0.1 --port 41987` in `apps/dashboard` | Local dashboard | Started and inspected in Chromium; 3000 and 3010 were occupied by unrelated processes |
+| `python scripts/simulate_telemetry.py --well NHK-421 --rate-hz 2 --inject-incident packoff --reset` | Synthetic telemetry | Deterministic generator and replay API are tested; CLI network loop is not a field-stream validation |
+| `python -m models.experimental.train` | Reproduce synthetic classifier | Run; artifact and evaluation checked into `models/experimental/artifacts/` |
+| `npx tsc --noEmit` in `apps/video` | Video typecheck | Passed |
+| `npx remotion render src/index.ts BeforeTheNextMetre out/sample.mp4 --frames=0-299 --browser-executable=/usr/bin/chromium` in `apps/video` | Local video render | Sample rendered; system Chromium avoids the failed automatic browser download |
+| `npm audit --audit-level=high` in each JavaScript app | Dependency audit | Zero reported vulnerabilities after upgrades; rerun when dependencies change |
 | `docker-compose up -d --build` | Intended container stack | Makefile target; not verified |
 
-Local tool versions observed: Python 3.14.7, Node 26.8.1, npm 11.19.0. README claims Python 3.12 and Node 18+ as targets; compatibility has not been established by these checks. If startup fails, reproduce before changing architecture.
+Local tool versions observed: Python 3.14.7, Node 26.8.1, npm 11.19.0, Tesseract 5.5.3, Poppler 26.08.0. An image-only synthetic PDF passed actual OCR extraction. Compatibility on other Python/Node versions has not been established by these checks. If startup fails, reproduce before changing architecture.
 
 ## Code graph from `/init`
 
