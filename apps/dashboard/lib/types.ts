@@ -49,6 +49,7 @@ export interface HistoricalWatch {
   surface_distance_km: number;
   alignment_method: string;
   source_file: string;
+  original_name?: string | null;
   page_marker: number | null;
   page_reference_type?: string;
   excerpt: string;
