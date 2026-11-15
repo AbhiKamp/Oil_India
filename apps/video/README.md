@@ -2,6 +2,15 @@
 
 Remotion rough master for Healix 1, SIH 2026, PS 26121. It uses an actual 131-second dashboard recording at 1.3× playback in a 141-second captioned, originally scored composition. The opening/closing geology is original explanatory graphic; all screen states are recorded from the running prototype.
 
+## 60-second cut (`NwisShort`)
+
+Music-only short for upload: space cold open, seven zoomed chapters of the real recording (find, connect, trace, review, hand over, watch, alert), and an end card. The score is original and generated deterministically with the Python stdlib on a 96 BPM grid, so cuts land on bar lines.
+
+```sh
+python3 scripts/generate_score.py   # writes public/score-original.wav (ignored)
+npm run render:short -- --browser-executable=/usr/bin/chromium   # out/stratasentry-nwis-60s.mp4
+```
+
 ## Preview and render
 
 ```sh

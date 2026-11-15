@@ -6,6 +6,7 @@
     "studio": "remotion studio src/index.ts",
     "still": "remotion still src/index.ts BeforeTheNextMetre out/preview.png --frame=90",
     "render:sample": "remotion render src/index.ts BeforeTheNextMetre out/sample.mp4 --frames=0-299",
+    "render:short": "remotion render src/index.ts NwisShort out/stratasentry-nwis-60s.mp4",
     "render": "remotion render src/index.ts BeforeTheNextMetre out/before-the-next-metre-rough.mp4"
   },
   "dependencies": {

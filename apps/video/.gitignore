@@ -5,3 +5,4 @@
 /public/captures/*.wav
 /public/voiceover-scratch.wav
 /scripts/__pycache__/
+/public/score-original.wav
