@@ -65,3 +65,6 @@ graphify-out/
 .local/
 .venv/
 *.tsbuildinfo
+
+# Generated synthetic capture input (source generator is checked in)
+demo/capture/fixtures/*.pdf
