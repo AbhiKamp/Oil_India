@@ -24,9 +24,6 @@ echo "[*] Installing Python dependencies..."
 pip install --upgrade pip
 pip install -r apps/api/requirements.txt
 
-echo "[*] Setting up local service links..."
-python scripts/link_services.py
-
 echo "[*] Seeding local datasets..."
 python scripts/seed_database.py
 

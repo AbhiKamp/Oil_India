@@ -55,7 +55,7 @@ Desktop.ini
 qdrant_storage/
 *.log
 
-# Python junction aliases (auto-created by scripts/link_services.py)
+# Legacy Windows junction aliases for hyphenated service directories
 services/*_*
 
 # Local code graph generated during project initialization
