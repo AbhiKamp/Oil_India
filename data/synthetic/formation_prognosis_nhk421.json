@@ -1,0 +1,13 @@
+{
+  "well_id": "NHK-421",
+  "provenance": "SYNTHETIC DEMO PROGNOSIS - NOT AN OBSERVED FORMATION TOP",
+  "depth_reference": "MD",
+  "datum": "synthetic rig KB",
+  "formation_intervals": [
+    {"formation_name": "Dihing Formation", "md_top": 0, "md_bottom": 650},
+    {"formation_name": "Tipam Sandstone", "md_top": 650, "md_bottom": 1850},
+    {"formation_name": "Girujan Clay", "md_top": 1850, "md_bottom": 2550},
+    {"formation_name": "Barail Coal-Shale", "md_top": 2550, "md_bottom": 3400},
+    {"formation_name": "Kopili Formation", "md_top": 3400, "md_bottom": 3950}
+  ]
+}

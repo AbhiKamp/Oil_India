@@ -9,14 +9,7 @@ class StuckPipeXGBoostModel:
     def __init__(self, model_path: str = None):
         self.model_path = model_path
         self.is_loaded = False
-        self._init_model()
-
-    def _init_model(self):
-        # In production with trained XGBoost model:
-        # import xgboost as xgb
-        # self.booster = xgb.Booster()
-        # self.booster.load_model(self.model_path)
-        self.is_loaded = True
+        self.method = "handwritten_heuristic_baseline"
 
     def predict_risk(self, features: Dict[str, float]) -> Dict[str, float]:
         """
@@ -34,15 +27,15 @@ class StuckPipeXGBoostModel:
         p_packoff = 0.05
         p_differential = 0.05
 
-        # Check Packoff Indicators: Rising SPP + High Torque Volatility + Decreasing ROP
-        if spp_slope > 3.0 and torque_std > 2.0:
-            packoff_factor = min(0.92, 0.40 + (spp_slope / 15.0) * 0.35 + (torque_std / 8.0) * 0.20)
+        # A restriction alone is not evidence of lost circulation or packoff.
+        if spp_slope > 3.0 and torque_std > 2.0 and rop < 10.0:
+            packoff_factor = min(0.92, 0.40 + (spp_slope / 15.0) * 0.30 + (torque_std / 8.0) * 0.15)
             p_packoff = round(packoff_factor, 3)
             p_normal = round(max(0.02, 1.0 - p_packoff - 0.05), 3)
             p_differential = 0.03
-        elif spp_slope > 1.5:
-            p_packoff = 0.45
-            p_normal = 0.50
+        elif spp_slope > 3.0 and torque_std > 2.0:
+            p_packoff = 0.35
+            p_normal = 0.60
             p_differential = 0.05
 
         # Check Differential Sticking Indicators: Stationary or Low ROP with High Overbalance (ECD >> Pore Pressure)

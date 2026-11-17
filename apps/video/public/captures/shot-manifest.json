@@ -1,0 +1,305 @@
+{
+  "capturedAt": "2026-10-20T17:06:48.834Z",
+  "baseURL": "http://127.0.0.1:41987",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "timezone": "Asia/Kolkata",
+  "browser": "/usr/bin/chromium · Chromium 152.0.7977.82",
+  "repositoryRevision": "7d5d222a8a202182b3a8aed12df929ded9dca556",
+  "coreRevision": "7d5d222a8a202182b3a8aed12df929ded9dca556",
+  "workingTreeDirty": true,
+  "workingTreeDirtyPaths": [
+    "M .gitignore",
+    "?? apps/video/",
+    "?? demo/capture/",
+    "?? docs/media/"
+  ],
+  "coreTreeClean": false,
+  "coreDirtyPaths": [
+    "M .gitignore"
+  ],
+  "scenario": "synthetic demo API; extracted and approved generated synthetic NHK-412 PDF; packoff replay progressed to signal escalation; no eRTMAC source",
+  "sourceHashesSha256": {
+    "data/synthetic/wells/wells.json": "1c0e01270dc989ab8f8ab94a0a3628c8cf8ffc682b6cb0d1dfae9ca83c1c4d19",
+    "data/synthetic/formation_prognosis_nhk421.json": "2a813ec238246c7110931796b1859af1f61f66eb2d01a6c27eb0fa6297179be3",
+    "data/synthetic/telemetry/telemetry_packoff_incident.csv": "e468d128ca3e541898163dd9aea7497e697d345318f222601bf4d67cce1295c5",
+    "data/synthetic/reports/WCR_MOR_118.txt": "6c452b066856514227a506b57c64553ba2b8418ea3d0887a44d8361f430a6ac9",
+    "data/synthetic/reports/WCR_NHK_412.txt": "6f930438b3bbfb432529bbe089f79ea1260b34e575cae778b619ba00bb926793",
+    "demo/capture/generate_synthetic_pdf.py": "5f0f370edf0d3a517e8866b9c899a2d18954e0b180f69d96eec788ddf4f895f0",
+    "demo/capture/fixtures/synthetic_nhk412_demo.pdf": "21062f3fe62d45e0eb929160eb267995f64fdc7c3637d21131900a83d0be08de"
+  },
+  "initialRadiusKm": 50,
+  "finalRadiusQueryKm": 50,
+  "offsetCount": 3,
+  "noteText": "Capture 2026-10-20T17-04-42-074Z: reviewed the cited synthetic source and formation context; carry the evidence into shift handover for engineering review.",
+  "uploadedDocumentName": "upload-21062f3fe62d45e0eb929160",
+  "uploadedEventId": "upload-21062f3fe62d45e0eb929160:0",
+  "captureDataDirectory": "/tmp/opencode/nwis-film-workflow-v4",
+  "notePersistenceVerified": true,
+  "status": "complete",
+  "shots": [
+    {
+      "name": "radius-nearby",
+      "purpose": "Actual 5 km radius result after successful nearby API response",
+      "holdSeconds": 6,
+      "at": "2026-10-20T17:04:43.240Z",
+      "url": "http://127.0.0.1:41987/"
+    },
+    {
+      "name": "radius-offsets",
+      "purpose": "Actual 50 km offset results (3) after successful API response",
+      "holdSeconds": 6,
+      "at": "2026-10-20T17:04:49.813Z",
+      "url": "http://127.0.0.1:41987/"
+    },
+    {
+      "name": "formation-comparison",
+      "purpose": "Actual formation tracks for NHK-412; reported MD values and comparison caveat",
+      "holdSeconds": 6,
+      "at": "2026-10-20T17:04:56.046Z",
+      "url": "http://127.0.0.1:41987/"
+    },
+    {
+      "name": "historical-watch",
+      "purpose": "MECHANICAL HOLE PACK-OFF & STUCK PIPE\n\nMOR-118 · Barail Coal-Shale Formation · 32.9 m MD ahead\n\nformation-top-relative approximation against synthetic demo tops; not validated geological correlation\nEvidence excerpt · text marker 19 · not a PDF page\nWCR_MOR_118.txt · inspect source & prepare handover",
+      "holdSeconds": 6,
+      "at": "2026-10-20T17:05:02.243Z",
+      "url": "http://127.0.0.1:41987/"
+    },
+    {
+      "name": "historical-source",
+      "purpose": "Actual source viewer auto-scrolled to the cited synthetic text marker 19; not a physical PDF page",
+      "holdSeconds": 6,
+      "at": "2026-10-20T17:05:08.586Z",
+      "url": "http://127.0.0.1:41987/"
+    },
+    {
+      "name": "knowledge-review",
+      "purpose": "Real text-PDF extraction with original document name and needs-review state",
+      "holdSeconds": 6,
+      "at": "2026-10-20T17:05:14.936Z",
+      "url": "http://127.0.0.1:41987/"
+    },
+    {
+      "name": "approved-event",
+      "purpose": "Engineer explicitly approved the extracted, cited training-only PDF event",
+      "holdSeconds": 6,
+      "at": "2026-10-20T17:05:21.094Z",
+      "url": "http://127.0.0.1:41987/"
+    },
+    {
+      "name": "approved-watch",
+      "purpose": "Approved PDF event became eligible for the historical watch, with physical page provenance",
+      "holdSeconds": 6,
+      "at": "2026-10-20T17:05:27.318Z",
+      "url": "http://127.0.0.1:41987/"
+    },
+    {
+      "name": "handover-note",
+      "purpose": "Actual engineer-entered note before save; not an operational recommendation",
+      "holdSeconds": 6,
+      "at": "2026-10-20T17:05:33.486Z",
+      "url": "http://127.0.0.1:41987/"
+    },
+    {
+      "name": "handover-saved",
+      "purpose": "Acknowledged decision returned in the Handover log",
+      "holdSeconds": 6,
+      "at": "2026-10-20T17:05:39.625Z",
+      "url": "http://127.0.0.1:41987/"
+    },
+    {
+      "name": "handover-persisted",
+      "purpose": "Same saved note reloaded from the API after page reload",
+      "holdSeconds": 6,
+      "at": "2026-10-20T17:05:45.984Z",
+      "url": "http://127.0.0.1:41987/"
+    },
+    {
+      "name": "synthetic-replay",
+      "purpose": "Actual pack-off synthetic replay, returned risk assessment: API RISK ASSESSMENT · CRITICAL\n\nHOLE_PACKOFF\n\nPRESSURE_RISE_WITH_TORQUE_VARIABILITY_AND_FALLING_ROP\n\n2845.1 m MD · Review the hole packoff assessment for Barail Coal-Shale against current measurements and source evidence.\n\nAssessment for engineering review; not an instruction or probability claim.; not live telemetry",
+      "holdSeconds": 6,
+      "at": "2026-10-20T17:06:34.958Z",
+      "url": "http://127.0.0.1:41987/"
+    },
+    {
+      "name": "operations-close",
+      "purpose": "Actual Operations view after replay, showing restored spatial/evidence/telemetry panels",
+      "holdSeconds": 6,
+      "at": "2026-10-20T17:06:41.161Z",
+      "url": "http://127.0.0.1:41987/"
+    }
+  ],
+  "captureURLs": [
+    "http://127.0.0.1:41987",
+    "http://localhost:8000/api/v1/wells",
+    "http://localhost:8000/api/v1/documents",
+    "http://localhost:8000/api/v1/events",
+    "http://localhost:8000/api/v1/decisions?well_id=NHK-421",
+    "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=50",
+    "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=50",
+    "http://localhost:8000/api/v1/wells/NHK-421/formations",
+    "http://localhost:8000/api/v1/wells/NHK-421/trajectory",
+    "http://localhost:8000/api/v1/telemetry/NHK-421/latest",
+    "http://localhost:8000/api/v1/risks/NHK-421/current",
+    "http://localhost:8000/api/v1/demo/replay",
+    "http://localhost:8000/api/v1/wells/NHK-412/formations",
+    "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=5",
+    "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=5",
+    "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=10",
+    "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=10",
+    "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=15",
+    "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=15",
+    "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=20",
+    "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=20",
+    "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=25",
+    "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=25",
+    "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=30",
+    "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=30",
+    "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=35",
+    "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=35",
+    "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=40",
+    "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=40",
+    "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=45",
+    "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=45",
+    "http://localhost:8000/api/v1/documents/WCR_MOR_118.txt/source",
+    "http://localhost:8000/api/v1/events/upload-21062f3fe62d45e0eb929160%3A0/review",
+    "http://localhost:8000/api/v1/decisions"
+  ],
+  "apiResponses": [
+    {
+      "url": "http://localhost:8000/api/v1/wells",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/documents",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/events",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/decisions?well_id=NHK-421",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=50",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=50",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/formations",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/trajectory",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/telemetry/NHK-421/latest",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:8000/api/v1/risks/NHK-421/current",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:8000/api/v1/demo/replay",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-412/formations",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=5",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=5",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=10",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=10",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=15",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=15",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=20",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=20",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=25",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=25",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=30",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=30",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=35",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=35",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=40",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=40",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/nearby?radius_km=45",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/wells/NHK-421/historical-watch?radius_km=45",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/documents/WCR_MOR_118.txt/source",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/events/upload-21062f3fe62d45e0eb929160%3A0/review",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/api/v1/decisions",
+      "status": 200
+    }
+  ]
+}

@@ -12,7 +12,10 @@ router = APIRouter(prefix="/api/v1/risks", tags=["Risk & Hazards"])
 @router.get("/{well_id}/current", response_model=RiskAssessmentResponse)
 async def get_current_risk(well_id: str):
     orc = DomainOrchestrator()
-    alert = orc.evaluate_live_risk(well_id)
+    try:
+        alert = orc.evaluate_live_risk(well_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Unknown well")
     if not alert:
         raise HTTPException(status_code=404, detail="Risk evaluation unavailable")
     return alert
@@ -20,5 +23,8 @@ async def get_current_risk(well_id: str):
 @router.get("/{well_id}/alerts", response_model=List[RiskAssessmentResponse])
 async def list_alerts(well_id: str):
     orc = DomainOrchestrator()
-    alert = orc.evaluate_live_risk(well_id)
+    try:
+        alert = orc.evaluate_live_risk(well_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Unknown well")
     return [alert] if alert else []

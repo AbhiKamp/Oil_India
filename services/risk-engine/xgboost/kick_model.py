@@ -6,6 +6,9 @@ Calculates calibrated probabilities for gas influx / kick vs lost circulation.
 from typing import Dict, Any
 
 class KickXGBoostModel:
+    is_loaded = False
+    method = "handwritten_heuristic_baseline"
+
     def predict_risk(self, features: Dict[str, float]) -> Dict[str, float]:
         pit_rate = features.get("pit_rate_m3_min", 0.0) # Positive = gain (kick), Negative = loss
         flow_delta = features.get("flow_delta_lpm", 0.0) # Flow Out - Flow In
@@ -16,14 +19,14 @@ class KickXGBoostModel:
         p_loss = 0.03
 
         # Kick signature: Pit volume gain + Flow Out > Flow In
-        if pit_rate > 0.05 or flow_delta > 150.0:
+        if pit_rate > 0.05 and flow_delta > 150.0:
             kick_severity = min(0.95, 0.40 + (pit_rate / 0.5) * 0.40 + (flow_delta / 800.0) * 0.20)
             p_kick = round(kick_severity, 3)
             p_normal = round(max(0.02, 1.0 - p_kick), 3)
             p_loss = 0.01
 
         # Lost circulation signature: Pit volume drop + Flow Out < Flow In
-        elif pit_rate < -0.05 or flow_delta < -200.0:
+        elif pit_rate < -0.05 and flow_delta < -200.0:
             loss_severity = min(0.95, 0.40 + (abs(pit_rate) / 0.5) * 0.40 + (abs(flow_delta) / 800.0) * 0.20)
             p_loss = round(loss_severity, 3)
             p_normal = round(max(0.02, 1.0 - p_loss), 3)

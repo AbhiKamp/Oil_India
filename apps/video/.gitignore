@@ -1,0 +1,8 @@
+/out/
+/public/ambient-original.wav
+/public/captures/*.webm
+/public/captures/*.mp4
+/public/captures/*.wav
+/public/voiceover-scratch.wav
+/scripts/__pycache__/
+/public/score-original.wav

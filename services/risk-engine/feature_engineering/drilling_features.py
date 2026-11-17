@@ -4,6 +4,7 @@ Computes physical petroleum indicators: MSE, d-exponent, SPP derivative, torque 
 """
 
 import math
+from datetime import datetime, timezone
 import numpy as np
 from typing import Dict, Any, List
 
@@ -12,7 +13,7 @@ class DrillingFeatureEngineer:
         self.bit_diameter = bit_diameter_in
         self.bit_area = math.pi * (bit_diameter_in / 2.0) ** 2 # sq inches (e.g. 56.74 sq in for 8.5" bit)
 
-    def extract_features(self, telemetry_window: List[Dict[str, Any]]) -> Dict[str, float]:
+    def extract_features(self, telemetry_window: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
         Calculates 12 engineered features from a window of recent telemetry frames.
         """
@@ -55,11 +56,7 @@ class DrillingFeatureEngineer:
             d_exp = 1.0
 
         # 3. SPP slope (rate of change in psi/sec)
-        spp_vals = [f.get("standpipe_pressure", spp) for f in telemetry_window[-15:]]
-        if len(spp_vals) >= 2:
-            spp_slope = float(np.polyfit(range(len(spp_vals)), spp_vals, 1)[0])
-        else:
-            spp_slope = 0.0
+        spp_slope, derivative_basis = self._slope(telemetry_window[-15:], "standpipe_pressure")
 
         # 4. Torque standard deviation
         torque_vals = [f.get("surface_torque", torque) for f in telemetry_window[-20:]]
@@ -69,8 +66,9 @@ class DrillingFeatureEngineer:
         flow_delta = flow_in * (flow_out_pct / 100.0 - 1.0)
 
         # 6. Pit volume rate of change (m^3 / min)
-        pit_vals = [f.get("pit_volume", pit_vol) for f in telemetry_window[-20:]]
-        pit_slope = float(np.polyfit(range(len(pit_vals)), pit_vals, 1)[0]) * 60.0 if len(pit_vals) >= 2 else 0.0
+        pit_slope, pit_derivative_basis = self._slope(telemetry_window[-20:], "pit_volume")
+        if pit_derivative_basis == "timestamp_seconds":
+            pit_slope *= 60.0
 
         return {
             "mse_ksi": round(mse_ksi, 2),
@@ -79,6 +77,9 @@ class DrillingFeatureEngineer:
             "torque_std": round(torque_std, 2),
             "flow_delta_lpm": round(flow_delta, 1),
             "pit_rate_m3_min": round(pit_slope, 3),
+            "derivative_basis": derivative_basis,
+            "spp_slope_basis": "psi_per_second" if derivative_basis == "timestamp_seconds" else "psi_per_sample",
+            "pit_rate_basis": "timestamp_minutes" if pit_derivative_basis == "timestamp_seconds" else "per_sample",
             "rop": rop,
             "wob": wob,
             "rpm": rpm,
@@ -86,3 +87,29 @@ class DrillingFeatureEngineer:
             "torque": torque,
             "ecd": current.get("ecd", mw)
         }
+
+    @staticmethod
+    def _slope(frames: List[Dict[str, Any]], key: str):
+        """Return value per second when all timestamps parse, otherwise value per sample."""
+        values = np.asarray([float(frame.get(key, 0.0)) for frame in frames], dtype=float)
+        if len(values) < 2:
+            return 0.0, "per_sample"
+        timestamps = [frame.get("timestamp") for frame in frames]
+        try:
+            if any(frame.get("timestamp_source") == "ingestion_time" for frame in frames):
+                raise ValueError("source timestamps absent")
+            parsed = [
+                value if isinstance(value, datetime) else datetime.fromisoformat(
+                    str(value).replace("Z", "+00:00")
+                ) for value in timestamps
+            ]
+            parsed = [value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value for value in parsed]
+            seconds = np.asarray([value.timestamp() for value in parsed], dtype=float)
+            elapsed = seconds - seconds[0]
+            if not np.all(np.isfinite(elapsed)) or np.any(np.diff(elapsed) <= 0):
+                raise ValueError("timestamps are not strictly increasing")
+            basis = "timestamp_seconds"
+        except (TypeError, ValueError, OverflowError):
+            elapsed = np.arange(len(values), dtype=float)
+            basis = "per_sample"
+        return float(np.polyfit(elapsed, values, 1)[0]), basis

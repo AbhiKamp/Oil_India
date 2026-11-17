@@ -1,5 +1,7 @@
 # Security Architecture & Data Governance Policy
-## StrataSentry-NWIS (National Well Intelligence System)
+## StrataSentry-NWIS (Nearby Wells Intelligence System)
+
+> Security design targets, not a certification or a claim of implemented production controls. The current prototype is loopback-local, uses self-entered reviewer identity, and must not be exposed publicly. See [delivery status](docs/delivery-status.md) for actual scope.
 
 ---
 

@@ -16,7 +16,7 @@ from apps.api.app.services.orchestrator import DomainOrchestrator
 def test_incident_simulation_and_copilot_mitigation():
     orc = DomainOrchestrator()
 
-    # Query Copilot for resolution advice
+    # Query for historical context; this prototype cannot prescribe a drilling procedure.
     res = orc.copilot.generate_advisory(
         query="What procedure should the driller follow if annular pressure surges in Barail coal?",
         current_depth=2845.0,
@@ -24,6 +24,6 @@ def test_incident_simulation_and_copilot_mitigation():
         evidence_chunks=orc.retriever.retrieve("stuck pipe in Barail coal", formation="Barail Coal-Shale", depth_md=2845.0)
     )
 
-    assert "stop drilling ahead" in res["answer"].lower()
-    assert "2,400 lpm" in res["answer"].lower()
+    assert "historical evidence for review" in res["answer"].lower()
+    assert "no setpoint or procedure is prescribed" in res["answer"].lower()
     assert len(res["citations"]) >= 1

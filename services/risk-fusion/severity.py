@@ -15,16 +15,16 @@ class SeverityCalculator:
         """
         Fuses:
         Combined Score = 0.50 * ML_prob + 0.40 * Physics_sev + 0.10 * Offset_precedent
-        Returns (Severity_Label, Lead_Time_Seconds)
+        Returns (severity label, 0); this heuristic does not estimate incident timing.
         """
         offset_score = 1.0 if historical_offset_match else 0.0
         fused = 0.50 * ml_probability + 0.40 * physics_severity + 0.10 * offset_score
 
         if fused >= 0.70:
-            return "CRITICAL", 300   # 5 minutes to catastrophic event
+            return "CRITICAL", 0
         elif fused >= 0.45:
-            return "WARNING", 900    # 15 minutes to escalation
+            return "WARNING", 0
         elif fused >= 0.25:
-            return "WATCH", 1800     # 30 minutes early precursor
+            return "WATCH", 0
         else:
-            return "INFO", 3600      # Normal operations advisory
+            return "INFO", 0

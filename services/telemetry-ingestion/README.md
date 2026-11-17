@@ -15,4 +15,4 @@ High-speed streaming ingestion pipeline for rig-site MWD, LWD, and surface instr
 - **`producers/`**:
   - `mock_rig_producer.py`: Generates continuous drilling streams with configurable anomalies.
 - **`consumers/`**:
-  - `stream_processor.py`: In-memory sliding buffer calculating rolling derivatives: $\frac{d(SPP)}{dt}$, torque volatility, flow delta, and Mechanical Specific Energy ($\text{MSE}$).
+  - `stream_processor.py`: In-memory sliding buffer calculating SPP change per second from valid source timestamps. If timestamps are missing, rates use a per-sample slope and report `derivative_basis: per_sample` (not a physical rate). Ingestion-generated timestamps are marked and do not masquerade as source sampling times.

@@ -16,9 +16,9 @@ class LSTMAutoencoderArchitecture:
         self.n_features = n_features
         self.latent_dim = latent_dim
         # Baseline normal weights representation
-        np.random.seed(42)
-        self.W_enc = np.random.randn(n_features, latent_dim) * 0.1
-        self.W_dec = np.random.randn(latent_dim, n_features) * 0.1
+        rng = np.random.default_rng(42)
+        self.W_enc = rng.standard_normal((n_features, latent_dim)) * 0.1
+        self.W_dec = rng.standard_normal((latent_dim, n_features)) * 0.1
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """

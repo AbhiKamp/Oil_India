@@ -44,3 +44,27 @@ def test_stream_processor_derivatives():
     assert "spp_rate_of_change_psi_sec" in enriched
     assert enriched["spp_rate_of_change_psi_sec"] > 0.0 # Confirms positive slope
     assert "mse_ksi" in enriched
+
+
+def test_stream_slope_uses_elapsed_source_time_and_labels_fallback():
+    timed = proc_mod.TelemetryStreamProcessor(window_size=10)
+    for i in range(5):
+        frame = {
+            "timestamp": f"2026-01-01T00:00:{i * 2:02d}+00:00",
+            "standpipe_pressure": 1000 + i * 20,
+            "surface_torque": 10, "rop": 10, "wob": 10, "rotary_rpm": 100,
+            "flow_in": 1000, "flow_out_pct": 100,
+        }
+        enriched = timed.process_frame(frame)
+    assert enriched["spp_rate_of_change_psi_sec"] == 10.0
+    assert enriched["derivative_basis"] == "timestamp_seconds"
+
+    untimed = proc_mod.TelemetryStreamProcessor(window_size=10)
+    for i in range(5):
+        frame = {
+            "standpipe_pressure": 1000 + i * 20, "surface_torque": 10, "rop": 10,
+            "wob": 10, "rotary_rpm": 100, "flow_in": 1000, "flow_out_pct": 100,
+        }
+        enriched = untimed.process_frame(frame)
+    assert enriched["spp_rate_of_change_psi_sec"] == 20.0
+    assert enriched["derivative_basis"] == "per_sample"

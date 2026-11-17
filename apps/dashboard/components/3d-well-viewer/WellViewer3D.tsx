@@ -67,9 +67,10 @@ export default function WellViewer3D({ stations, currentDepth, formations }: Wel
 
       // Draw Formation Horizons (Horizontal Planes)
       formations.forEach((f, idx) => {
+        if (f.tvd_top === null) return;
         const yPos = 30 + f.tvd_top * scaleY;
         ctx.fillStyle = idx % 2 === 0 ? 'rgba(56, 189, 248, 0.05)' : 'rgba(245, 158, 11, 0.04)';
-        const nextTop = (idx + 1 < formations.length) ? formations[idx + 1].tvd_top : 4000;
+        const nextTop = formations.slice(idx + 1).find((formation) => formation.tvd_top !== null)?.tvd_top ?? 4000;
         const sliceHeight = (nextTop - f.tvd_top) * scaleY;
         ctx.fillRect(40, yPos, width - 80, sliceHeight);
 

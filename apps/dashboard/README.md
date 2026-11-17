@@ -1,34 +1,40 @@
-# StrataSentry-NWIS Tactical Drilling Operations HUD
+# StrataSentry NWIS dashboard
 
-Next.js / React interactive tactical driller cabin and operations center display for real-time hazard monitoring, 3D wellbore geometry, and AI assistant interaction.
+Next.js 15 / React 18 / TypeScript interface for the local read-only NWIS prototype.
 
----
+## Run
 
-## Features
-
-- **3D Wellbore Spatial Viewer**:
-  - Interactive Canvas / WebGL 3D borehole trajectory viewer.
-  - Real-time bit position tracking.
-  - Sub-surface geological formation horizon planes (Dihing, Tipam, Girujan, Barail, Kopili).
-  - Offset well trajectories (e.g. MOR-118, NHK-412).
-- **Live Drilling Gauges & Telemetry Panel**:
-  - High-frequency digital indicators: ROP, WOB, RPM, Torque, SPP, Flow In, Flow Out %, Pit Volume, Dynamic ECD, Gamma Ray.
-- **Multi-Modal Risk & Hazard Alerts**:
-  - Severity status badges (`CRITICAL`, `WARNING`, `WATCH`, `INFO`).
-  - Estimated lead-time countdowns.
-  - Actionable step-by-step Standard Operating Procedures (SOPs).
-- **Historical Evidence Drawer**:
-  - Grounded offset well completion report excerpts with exact page and depth citations.
-- **Interactive AI Drilling Copilot**:
-  - Conversational RAG assistant grounded in legacy well archives.
-
----
-
-## Running Locally
+Start the API from the repository root as described in the [main README](../../README.md), then:
 
 ```bash
-cd apps/dashboard
-npm install
+npm ci
 npm run dev
 ```
-Open `http://localhost:3000` in your browser.
+
+Default API: `http://localhost:8000`. Set `NEXT_PUBLIC_API_URL` before building if it differs. Local development API CORS permits loopback origins; production origins must be configured explicitly.
+
+For browser capture, use a stable production build rather than building into a running dev server's `.next/` directory:
+
+```bash
+npm run build
+npm run start -- --hostname 127.0.0.1 --port 41987
+```
+
+## Views
+
+- **Operations:** real coordinate-radius filtering on a schematic map, source-backed formation comparison, historical-context watch, and explicit synthetic telemetry replay.
+- **Knowledge & review:** PDF upload, extraction inspection, source viewing, and approval/rejection. The API also supports corrections with a recorded reviewer audit.
+- **Handover:** engineer notes linked to an approved historical event; the active-well and historical-well identities remain distinct.
+
+All supplied scenarios are synthetic. A source-text marker is not a physical PDF page. Top-relative mapping is approximate, model scores are uncalibrated, and the source-summary assistant is not a language model. Unknown readings remain unavailable instead of being filled with plausible values.
+
+The coordinate schematic is not a tiled basemap; the local profile does not include a validated multi-well reservoir reconstruction. No eRTMAC connection or rig-control action is represented.
+
+## Checks
+
+```bash
+npm run build
+npm audit --audit-level=high
+```
+
+See [delivery status](../../docs/delivery-status.md) for verified commands and limits. Browser capture/check tooling is isolated from the production UI under `apps/video/` and `demo/capture/`.

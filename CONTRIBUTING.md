@@ -17,8 +17,8 @@ Welcome to the **StrataSentry-NWIS** development community. We welcome contribut
 
 ```bash
 # Clone the repository
-git clone https://github.com/oil-india-consortium/stratasentry-nwis.git
-cd stratasentry-nwis
+git clone https://github.com/Fadhil006/Oil_India.git
+cd Oil_India
 
 # Setup virtual environment
 python -m venv venv

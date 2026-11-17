@@ -10,7 +10,7 @@ class MitigationExtractor:
     def extract_mitigation_actions(self, text: str) -> List[Dict[str, Any]]:
         mitigations = []
         # Match 'Mitigation Procedure & Fishing Actions Taken:' or 'Immediate Well Control Actions Taken:'
-        pattern = r'(?:Mitigation Procedure|Actions Taken|Fishing Actions|Well Control Actions)(?:.*?):(.*?)(?:Recommendations|Total NPT|\={4,}|\Z)'
+        pattern = r'(?:Mitigation(?: Procedure)?|Actions Taken|Fishing Actions|Well Control Actions)(?:[^\n]*?):(.*?)(?:Recommendations|Total NPT|\={4,}|\Z)'
         matches = re.finditer(pattern, text, re.DOTALL | re.IGNORECASE)
         for m in matches:
             body = m.group(1).strip()

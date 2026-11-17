@@ -1,5 +1,7 @@
 # StrataSentry-NWIS Solution Overview
-## Next-Generation National Well Intelligence Platform
+## Nearby Wells Intelligence Platform
+
+> Solution design. Consult [delivery status](delivery-status.md) for implemented features and verification; the broader integrations and model capabilities described here are not all available in the local prototype.
 
 ---
 

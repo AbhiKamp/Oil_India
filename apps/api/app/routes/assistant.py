@@ -2,7 +2,7 @@
 StrataSentry-NWIS: AI Drilling Assistant / Copilot Endpoint
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from ..schemas.pydantic_models import ChatRequest, ChatResponse
 from ..services.orchestrator import DomainOrchestrator
 
@@ -11,6 +11,9 @@ router = APIRouter(prefix="/api/v1/assistant", tags=["AI Copilot"])
 @router.post("/chat", response_model=ChatResponse)
 async def chat_with_copilot(req: ChatRequest):
     orc = DomainOrchestrator()
+    if req.well_id not in {well["well_id"] for well in orc.wells}:
+        raise HTTPException(status_code=404, detail="Unknown well")
+    orc.refresh_knowledge()
     # 1. Retrieve relevant offset evidence
     chunks = orc.retriever.retrieve(
         query=req.query,

@@ -1,6 +1,6 @@
 # Risk Fusion Engine
 
-Master multi-domain risk arbitration engine fusing Machine Learning predictions, Physics Rule checks, and Offset Historical precedents into schema-compliant operational drilling alerts.
+Heuristic risk arbitration combining telemetry rules and optional offset evidence. Scores are uncalibrated and are not field-validated.
 
 ---
 
@@ -9,7 +9,7 @@ Master multi-domain risk arbitration engine fusing Machine Learning predictions,
 - **`fusion_engine.py`**:
   - Coordinates multi-signal arbitration.
 - **`severity.py`**:
-  - Computes hazard severity (`INFO`, `WATCH`, `WARNING`, `CRITICAL`) and countdown lead-time.
+  - Computes heuristic severity (`INFO`, `WATCH`, `WARNING`, `CRITICAL`); incident countdown is not estimated.
 - **`confidence.py`**:
   - Unified multi-modal confidence scoring.
 - **`alert_builder.py`**:

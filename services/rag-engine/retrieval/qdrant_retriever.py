@@ -1,89 +1,62 @@
-"""
-StrataSentry-NWIS: Qdrant Vector Retriever
-Retrieves grounded historical drilling chunks using semantic search and payload filtering.
+"""Local lexical evidence retrieval (legacy class name retained for callers).
+
+No vector database or trained semantic model is represented by this local mode.
+Depth in another well is deliberately not used as a relevance bonus.
 """
 
-from typing import List, Dict, Any, Optional
-import numpy as np
-try:
-    from ..embeddings.domain_embedder import DomainEmbedder
-    from .metadata_filter import MetadataFilterBuilder
-except (ImportError, ValueError):
-    from embeddings.domain_embedder import DomainEmbedder
-    from retrieval.metadata_filter import MetadataFilterBuilder
+import re
+from typing import Any, Dict, List, Optional
+
+
+_STOPWORDS = set("a an and are as at be by can did do does for from happened has have how i in is it me of on or should show tell that the these this to was were what when where which who why with would".split())
+
+
+def terms(text: str) -> set[str]:
+    text = text.casefold().replace("pack-off", "packoff").replace("pack off", "packoff")
+    return set(re.findall(r"[a-z0-9]+", text)) - _STOPWORDS
+
+
+def formation_key(text: str) -> str:
+    return " ".join(text.casefold().removesuffix(" formation").split())
+
 
 class QdrantRetriever:
     def __init__(self, host: str = "localhost", port: int = 6333, collection_name: str = "drilling_knowledge_chunks"):
-        self.host = host
-        self.port = port
-        self.collection_name = collection_name
-        self.embedder = DomainEmbedder()
+        self.local_chunks: List[Dict[str, Any]] = []
+        self.mode = "local_lexical_search"
         self.client = None
-        self.local_chunks = [] # In-memory fallback index
-        self._init_client()
-
-    def _init_client(self):
-        try:
-            from qdrant_client import QdrantClient
-            self.client = QdrantClient(host=self.host, port=self.port, timeout=2.0)
-        except Exception:
-            self.client = None
 
     def add_local_chunks(self, chunks: List[Dict[str, Any]]):
-        """Indexes chunks for in-memory / edge search."""
-        for c in chunks:
-            c_copy = dict(c)
-            c_copy["embedding"] = self.embedder.embed_text(c["text"])
-            self.local_chunks.append(c_copy)
+        """Upsert by source chunk ID, keeping repeated indexing idempotent."""
+        indexed = {chunk["chunk_id"]: chunk for chunk in self.local_chunks}
+        for chunk in chunks:
+            indexed[chunk["chunk_id"]] = dict(chunk)
+        self.local_chunks = list(indexed.values())
 
-    def retrieve(
-        self,
-        query: str,
-        formation: Optional[str] = None,
-        depth_md: Optional[float] = None,
-        limit: int = 3
-    ) -> List[Dict[str, Any]]:
-        """
-        Executes hybrid semantic retrieval.
-        """
-        query_vec = self.embedder.embed_text(query)
-
-        # 1. Try Qdrant client if available
-        if self.client:
-            try:
-                # Use Qdrant search
-                pass
-            except Exception:
-                pass
-
-        # 2. In-memory cosine search fallback
+    def retrieve(self, query: str, formation: Optional[str] = None,
+                 depth_md: Optional[float] = None, limit: int = 3) -> List[Dict[str, Any]]:
+        query_terms = terms(query)
+        if not query_terms or limit <= 0:
+            return []
         results = []
-        for c in self.local_chunks:
-            # Metadata filter check
-            if formation and formation != "All" and c.get("formation_name") != formation:
+        # ponytail: linear scan for the small demo corpus; use indexed text search when it grows.
+        for chunk in self.local_chunks:
+            if formation and formation.casefold() != "all" and formation_key(chunk.get("formation_name") or "") != formation_key(formation):
                 continue
-
-            # Cosine similarity
-            c_emb = np.array(c["embedding"])
-            q_emb = np.array(query_vec)
-            score = float(np.dot(c_emb, q_emb) / (np.linalg.norm(c_emb) * np.linalg.norm(q_emb) + 1e-9))
-
-            # Depth proximity bonus if depth matches within 100m
-            if depth_md and c.get("md_top") is not None:
-                dist = abs(c["md_top"] - depth_md)
-                if dist < 100:
-                    score += 0.15
-
+            if chunk.get("review_state", "approved") != "approved":
+                continue
+            document_terms = terms(" ".join(str(chunk.get(key) or "") for key in ("text", "well_name", "formation_name")))
+            overlap = query_terms & document_terms
+            if not overlap:
+                continue
+            score = len(overlap) / len(query_terms)
             results.append({
-                "chunk_id": c.get("chunk_id", ""),
-                "well_name": c.get("well_name", ""),
-                "formation_name": c.get("formation_name", ""),
-                "md_top": c.get("md_top"),
-                "md_bottom": c.get("md_bottom"),
-                "page_number": c.get("page_number", 1),
-                "text": c.get("text", ""),
-                "score": round(score, 3)
+                **{key: chunk.get(key) for key in (
+                    "chunk_id", "well_name", "document_name", "formation_name", "md_top",
+                    "md_bottom", "page_number", "text", "page_reference_type", "provenance",
+                )},
+                "score": round(score, 3),
+                "retrieval_method": self.mode,
             })
-
-        results.sort(key=lambda x: x["score"], reverse=True)
+        results.sort(key=lambda item: (-item["score"], item["chunk_id"]))
         return results[:limit]

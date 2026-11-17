@@ -1,0 +1,87 @@
+{
+  "scope": "synthetic current-pattern classification only; not future incident prediction or field reliability",
+  "limitations": [
+    "generated telemetry, not observed field data",
+    "well IDs are synthetic generator group keys, not independent real wells",
+    "transition frames 60-69 are omitted; labels classify present patterns only",
+    "no alert horizon, lead-time, operating-hour false-alert, or field validation"
+  ],
+  "split": {
+    "train_groups": 24,
+    "test_groups": 6,
+    "overlap_groups": 0,
+    "train_wells": 8,
+    "test_wells": 2,
+    "well_overlap": 0,
+    "train_windows": 216,
+    "test_windows": 54
+  },
+  "model": {
+    "accuracy": 0.9814814814814815,
+    "confusion_matrix_true_rows_pred_columns": [
+      [
+        41,
+        0,
+        1
+      ],
+      [
+        0,
+        6,
+        0
+      ],
+      [
+        0,
+        0,
+        6
+      ]
+    ],
+    "per_class": {
+      "normal": {
+        "precision": 1.0,
+        "recall": 0.9761904761904762
+      },
+      "packoff": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "kick": {
+        "precision": 0.8571428571428571,
+        "recall": 1.0
+      }
+    }
+  },
+  "majority_baseline": {
+    "accuracy": 0.7777777777777778,
+    "confusion_matrix_true_rows_pred_columns": [
+      [
+        42,
+        0,
+        0
+      ],
+      [
+        6,
+        0,
+        0
+      ],
+      [
+        6,
+        0,
+        0
+      ]
+    ],
+    "per_class": {
+      "normal": {
+        "precision": 0.7777777777777778,
+        "recall": 1.0
+      },
+      "packoff": {
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "kick": {
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    }
+  }
+}

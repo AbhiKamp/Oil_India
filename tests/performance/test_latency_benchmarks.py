@@ -1,11 +1,12 @@
 """
-StrataSentry-NWIS: Performance & Ingestion Latency Benchmarks
-Verifies that processing latency is strictly well below the 500 ms real-time requirement.
+Local in-process compute timing on the tiny synthetic corpus.
+Excludes HTTP, sensors, ingestion queues, and browser presentation; not a capacity claim.
 """
 
 import time
 import os
 import sys
+import statistics
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if PROJECT_ROOT not in sys.path:
@@ -33,25 +34,29 @@ def benchmark_telemetry_throughput(n_frames=500):
         "gas_total": 15.0
     }
 
+    timings = []
     start = time.perf_counter()
     for _ in range(n_frames):
+        before = time.perf_counter()
         orc.ingest_telemetry_frame(frame)
         orc.evaluate_live_risk("NHK-421")
+        timings.append((time.perf_counter() - before) * 1000.0)
     total_time = time.perf_counter() - start
 
     avg_ms = (total_time / n_frames) * 1000.0
-    frames_per_sec = n_frames / total_time
+    p95_ms = sorted(timings)[min(n_frames - 1, int(n_frames * .95))]
 
     print("=" * 65)
-    print("STRATASENTRY-NWIS REAL-TIME LATENCY BENCHMARK")
+    print("NWIS LOCAL SYNTHETIC COMPUTE BENCHMARK (NOT END-TO-END)")
     print("=" * 65)
     print(f"Frames Ingested & Evaluated: {n_frames}")
     print(f"Total Wall Time:            {total_time:.3f} s")
-    print(f"Average Frame Latency:      {avg_ms:.2f} ms (Target: < 500 ms)")
-    print(f"Throughput Capacity:        {frames_per_sec:.1f} frames/sec")
+    print(f"Average Compute Latency:    {avg_ms:.2f} ms")
+    print(f"Median / p95 Compute:       {statistics.median(timings):.2f} / {p95_ms:.2f} ms")
+    print("Excludes transport and UI; repeated synthetic input only.")
     print("=" * 65)
 
-    assert avg_ms < 500.0, f"Latency {avg_ms:.2f}ms exceeded 500ms budget!"
+    return {"frames": n_frames, "average_ms": avg_ms, "p95_ms": p95_ms}
 
 if __name__ == "__main__":
     benchmark_telemetry_throughput(500)
